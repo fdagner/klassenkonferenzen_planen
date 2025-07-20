@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Klassenkonferenzen planen" />
+  <meta name="author" content="fdagner" />
+  <title>Klassenkonferenzen planen</title>
+  <script src="js/script.js" defer></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <div class="container">
+    <h1><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"
+        style="margin-bottom:-2px;width:30px;fill: #007bff"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+        <path
+          d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40L64 64C28.7 64 0 92.7 0 128l0 16 0 48L0 448c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-256 0-48 0-16c0-35.3-28.7-64-64-64l-40 0 0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40L152 64l0-40zM48 192l80 0 0 56-80 0 0-56zm0 104l80 0 0 64-80 0 0-64zm128 0l96 0 0 64-96 0 0-64zm144 0l80 0 0 64-80 0 0-64zm80-48l-80 0 0-56 80 0 0 56zm0 160l0 40c0 8.8-7.2 16-16 16l-64 0 0-56 80 0zm-128 0l0 56-96 0 0-56 96 0zm-144 0l0 56-64 0c-8.8 0-16-7.2-16-16l0-40 80 0zM272 248l-96 0 0-56 96 0 0 56z" />
+      </svg> Klassenkonferenzen planen</h1>
+    <div id="loadingIndicator" class="loading-indicator">
+      <div class="spinner"></div>
+      <p>Daten werden geladen...</p>
+    </div>
+    <div id="optionen">
+      <div class="tabs">
+        <button class="tab-button active" data-tab="faq">Anleitung -></button>
+        <button class="tab-button" data-tab="csvEdit">Daten -></button>
+        <button class="tab-button" data-tab="einstellungen">Optionen -></button>
+        <button class="tab-button hidden" data-tab="planung" id="planungTab">Planung</button>
+      </div>
+      <div class="tab-content active" id="faq">
+        <h2>Anleitung</h2>
+        <img src="img/konferenz.png" alt="Beschreibung" class="image-effect">
+        <details class="faq-item">
+          <summary>Was ist der Konferenzplaner?</summary>
+          <div class="faq-content">Der Konferenzplaner dient zur Planung von Klassenkonferenzen basierend
+            auf den importierten Daten aus der bayerischen ASV oder aus einem Stundenplanprogramm. Im Unterschied zum
+            ASV-Bericht "Klassenkonferenz", bietet der Konferenzplaner eine dynamische, browserbasierte Planung mit
+            direkter Datenbearbeitung.
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>Welches Format müssen die Daten für Unterricht und Klassenleiter haben?</summary>
+          <div class="faq-content">
+            <p>Die Dateien verwenden Kommas als Trennzeichen und die Werte können optional in Anführungszeichen gesetzt
+              werden, um
+              Sonderzeichen zu unterstützen. Dieses Format entspricht den Exportdateien STDPLAN.txt und STDKLAS.txt der
+              ASV.</p>
+            <h3>Unterricht (entspricht zum Beispiel STDPLAN.txt)</h3>
+            <ul>
+              <li><strong>Kopfzeile</strong>: Die erste Zeile muss die Spaltenüberschriften enthalten: Klasse, Fach,
+                Lehrkraft (Reihenfolge beliebig, Groß-/Kleinschreibung wird ignoriert, Anführungsstriche optional).</li>
+              <li><strong>Datenzeilen</strong>: Jede weitere Zeile repräsentiert eine Unterrichtseinheit mit den Werten:
+                <ul>
+                  <li>Klasse: Name der Klasse (z. B. 5A, 10B).</li>
+                  <li>Fach: Name des Fachs (z. B. M, D).</li>
+                  <li>Lehrkraft: Kürzel der Lehrkraft (z. B. Mül, Sch).</li>
+                </ul>
+              </li>
+              <li><strong>Beispiel</strong>:
+                <pre>
+"Klasse","Fach","Lehrkraft"
+"5A","M","Mül"
+"5A","D","Sch"
+"6B","E","Mei"
+            </pre>
+              </li>
+            </ul>
+            <h3>Klassenleiter (entspricht zum Beispiel STDKLAS.txt)</h3>
+            <ul>
+              <li><strong>Header</strong>: Die erste Zeile muss die Spaltenüberschriften enthalten: Klasse,
+                Klassenleitung (Reihenfolge beliebig, Groß-/Kleinschreibung wird ignoriert, Anführungsstriche optional).
+              </li>
+              <li><strong>Datenzeilen</strong>: Jede weitere Zeile repräsentiert eine Klassenleitungszuweisung mit den
+                Werten:
+                <ul>
+                  <li>Klasse: Name der Klasse (z. B. 5A, 10B).</li>
+                  <li>Klassenleitung: Name der Lehrkraft, die die Klassenleitung innehat (z. B. Mül).</li>
+                </ul>
+              </li>
+              <li><strong>Beispiel</strong>:
+                <pre>
+"Klasse","Klassenleitung"
+"5A","Mül"
+"6B","Sch"
+            </pre>
+              </li>
+            </ul>
+            <p><strong>Hinweis</strong>: Leere Werte oder ungültige Zeilen (z. B. fehlende Werte) führen zu Warnungen.
+              Die Dateien müssen mindestens eine gültige Datenzeile enthalten, um als erfolgreich geladen zu gelten.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>Können Unterricht und Klassen nachträglich ergänzt werden?</summary>
+          <div class="faq-content">Unterrichts- und Klassenleiterdaten werden lokal im Browser gespeichert und können
+            direkt im Konferenzplaner ergänzt oder
+            bearbeitet werden. Nach dem Hochladen der Dateien können Sie neue Zeilen
+            hinzufügen oder bestehende Einträge bearbeiten. Verwenden Sie die Schaltflächen „Zeile hinzufügen“ und
+            „Speichern“, um die Änderungen in den Daten zu speichern. Diese Änderungen werden dann bei der Planung
+            berücksichtigt.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Mit welcher Methode erfolgt die Berechnung?</summary>
+          <div class="faq-content">Die Berechnung erfolgt mit einem Monte-Carlo-Ansatz, der einen randomisierten
+            Greedy-Algorithmus mehrfach ausführt. Mehrere Pläne werden generiert. Der beste wird anhand minimaler
+            Warnungen und geringster Varianz der Anwesenheitsquoten ausgewählt.
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>Wie erhalte ich ein optimales Ergebnis?</summary>
+          <div class="faq-content">Um ein optimales Ergebnis zu erzielen, stellen Sie sicher, dass beide Dateien
+            (Unterricht und Klassenleiter) korrekt formatiert und vollständig sind. Wählen Sie realistische
+            Einstellungen wie ausreichende Zeitfenster (max. Slots), eine angemessene maximale Anzahl an Klassen pro
+            Slot und eine passende Mindestanwesenheitsquote. Führen Sie mehrere Versuche durch, indem Sie
+            die Anzahl der Versuche erhöhen, um die beste Planung zu finden.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Warum können nicht alle Klassen verplant werden?</summary>
+          <div class="faq-content">Ursachen können sein:
+            <ul>
+              <li>unzureichende Anzahl anwesender
+                Lehrer</li>
+              <li>wenn die Klassenleiterpflicht aktiviert ist und der
+                Klassenleiter nicht verfügbar ist oder nicht in der Klasse unterrichtet</li>
+              <li>zu hohe Mindesanwesenheitsquote</li>
+              <li>zu wenig Zeitslots</li>
+            </ul>
+            Überprüfen Sie die Warnungen im Planungsergebnis, um die genauen Ursachen
+            zu identifizieren.
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>Was bedeutet „Lehrer nicht anwesend“?</summary>
+          <div class="faq-content">„Lehrer nicht anwesend“ bedeutet, dass ein Lehrer, der für eine Klasse relevant ist
+            (entweder als Klassenleiter oder als Fachlehrer), nicht in der Liste der anwesenden Lehrer ausgewählt wurde.
+            Dies kann passieren, wenn der Lehrer in den Einstellungen (Lehrer-Checkboxen) abgewählt wurde. Sie können
+            die Liste der
+            anwesenden Lehrer anpassen, um sicherzustellen, dass alle benötigten Lehrer verfügbar sind.
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>Können nach Jahrgangsstufen geordnete Pläne berechnet werden („Eine Klasse pro Jahrgang je
+            Zeitslot“)?
+          </summary>
+          <div class="faq-content">Der Konferenzplaner unterstützt die Option „Eine Klasse pro Jahrgang je Slot“, die
+            sicherstellt, dass in einem Slot nur eine Klasse pro Jahrgangsstufe geplant wird. Aktivieren Sie diese
+            Option in den Planungsoptionen, und geben Sie für Klassen ohne Jahrgang (z. B. Kurse ohne führende Zahl)
+            manuell einen Jahrgang ein. Der Planer berücksichtigt dann diese Beschränkung und verteilt Klassen
+            unterschiedlicher Jahrgänge auf die Slots.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Was sind bevorzugte Fächer?</summary>
+          <div class="faq-content">Bevorzugte Fächer sind Fächer, die bei der Planung priorisiert werden, um Lehrer mit
+            diesen Fächern bevorzugt einer Klasse zuzuweisen. Sie können in den Optionen aus der Liste der verfügbaren
+            Fächer auswählen, welche Fächer bevorzugt werden sollen. Der Planer versucht, Lehrer mit diesen Fächern in
+            die Konferenzen einzubeziehen, um die Relevanz der anwesenden Lehrer zu erhöhen. Dies ist besonders
+            nützlich, um sicherzustellen, dass Hauptfachlehrer anwesend sind.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Was bedeutet „Klassenleiter in eigene Klasse verplanen“?</summary>
+          <div class="faq-content">Die Option „Klassenleiter in eigene Klasse verplanen“ (Klassenleiterpflicht) stellt
+            sicher, dass der Klassenleiter einer Klasse zwingend in der Konferenz dieser Klasse anwesend ist, sofern er
+            verfügbar ist. Wenn diese Option aktiviert ist und der Klassenleiter nicht anwesend ist oder nicht in der
+            Klasse unterrichtet, wird die Klasse nicht verplant, und es erscheint eine entsprechende Warnung. Diese
+            Einstellung ist nützlich, um sicherzustellen, dass Klassenleiter an den Konferenzen ihrer Klassen
+            teilnehmen. Wenn ein Klassenlehrer nicht verfügbar ist, sollte der Ersatz in die Tabelle der Klassenleiter
+            eingetragen
+            werden.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Wie wird die Mindestanwesenheitsquote berechnet?</summary>
+          <div class="faq-content">Die Mindestanwesenheitsquote gibt an, wie viele Lehrer einer Klasse (als Anteil der
+            Gesamtzahl der Lehrer dieser Klasse) mindestens in einer Konferenz anwesend sein müssen. Sie wird als
+            Prozentsatz (z. B. 0,5 für 50 %) in den Planungsoptionen festgelegt. Für jede Klasse wird die Gesamtzahl der
+            Lehrer aus dem Unterricht ermittelt. Die Mindestanwesenheitsquote berechnet die minimale Anzahl
+            an anwesenden Lehrern. Beispiel: Für eine Klasse mit 10 Lehrern und einer Quote von 0,5 müssen
+            mindestens 5 Lehrer anwesend sein.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Wie kann der Konferenzplan manuell bearbeitet werden?</summary>
+          <div class="faq-content">Der Konferenzplan kann manuell bearbeitet werden, nachdem ein Plan
+            erstellt wurde. Sie können Lehrer zwischen den Spalten „Anwesend“ und „Möglich“ verschieben, indem Sie auf
+            die Pfeile (→ oder ←) neben den Lehrern klicken, um sie hinzuzufügen oder zu entfernen. Zudem können Sie
+            Klassen zwischen Slots verschieben, indem Sie das Dropdown-Menü in der Spalte „Slot“ verwenden. Beachten
+            Sie, dass Änderungen die Mindestanwesenheitsquote oder die Klassenleiterpflicht beeinflussen können, und
+            Warnungen werden angezeigt, falls Konflikte (z. B. doppelte Lehrer oder Jahrgangsüberschneidungen)
+            auftreten. Nach jeder Änderung wird der Plan automatisch gespeichert.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Welche Exportformate stehen zur Verfügung?</summary>
+          <div class="faq-content">Der Konferenzplaner bietet zwei Exportformate: <ul>
+              <li><strong>Konferenzplan (CSV):</strong> Enthält für jeden Slot die Klasse, den Klassenleiter und die
+                anwesenden Lehrer.</li>
+              <li><strong>Lehrerplan (CSV):</strong> Zeigt für jeden Lehrer und Slot die Klassen, an deren Konferenzen
+                der Lehrer teilnimmt.</li>
+            </ul> Beide Exporte sind im CSV-Format verfügbar und können über die Schaltflächen „Klassenplan exportieren“
+            und „Lehrerplan exportieren“ im Planungstab heruntergeladen werden.</div>
+        </details>
+      </div>
+      <div class="tab-content" id="csvEdit">
+        <div class="tabs">
+          <button class="tab-button" data-tab="unterricht">Unterricht</button>
+          <button class="tab-button" data-tab="klassenleiter">Klassenleiter</button>
+        </div>
+        <h2>Daten</h2>
+        <div class="note">
+          <p>Beginnen Sie damit, die Unterrichts- und Klassenleiter-Daten zu importieren. Die Daten werden nur lokal im
+            Browser gespeichert.</p>
+        </div>
+        <div class="file-upload">
+          <label for="unterrichtInput">Unterricht importieren, z. B. STDPLAN.txt</label>
+          <input type="file" id="unterrichtInput" accept=".csv,.txt" />
+        </div>
+        <div class="file-upload">
+          <label for="klassenleiterInput">Klassenleiter importieren, z. B. STDKLAS.txt</label>
+          <input type="file" id="klassenleiterInput" accept=".csv,.txt" />
+          <div class="file-upload" style="margin-top: 20px;">
+            <button id="resetCSV" class="reset-btn">Gespeicherte Daten zurücksetzen</button>
+          </div>
+        </div>
+        <div id="csvMessage" class="message-box"></div>
+      </div>
+      <div class="tab-content" id="unterricht">
+        <div class="tabs"><button class="tab-button" data-tab="csvEdit">zurück</button></div>
+        <div class="file-upload hidden" id="csvTablesSection">
+          <h3>Unterricht</h3>
+          <div class="note">
+            <p>Die Tabelle erscheint, sobald die Daten geladen sind. Bearbeiten Sie die Daten, fügen Sie neue Zeilen
+              hinzu oder löschen Sie bestehende Zeilen und speichern Sie die Änderungen.</p>
+          </div>
+          <div id="unterrichtCSVTable"></div>
+          <button id="addUnterrichtRow" class="add-row-btn">Neue Zeile hinzufügen</button>
+          <button id="saveUnterrichtCSV" class="save-btn">Änderungen speichern</button>
+        </div>
+      </div>
+      <div class="tab-content" id="klassenleiter">
+        <div class="tabs"><button class="tab-button" data-tab="csvEdit">zurück</button></div>
+        <div id="klassenleiterCSVSection">
+          <h3>Klassenleiter</h3>
+          <div class="note">
+            <p>Die Tabelle erscheint, sobald die Daten geladen sind. Bearbeiten Sie die Daten, fügen Sie neue Zeilen
+              hinzu oder löschen Sie bestehende Zeilen und speichern Sie die Änderungen.</p>
+          </div>
+          <div id="klassenleiterCSVTable"></div>
+          <button id="addKlassenleiterRow" class="add-row-btn">Neue Zeile hinzufügen</button>
+          <button id="saveKlassenleiterCSV" class="save-btn">Änderungen speichern</button>
+        </div>
+      </div>
+      <div class="tab-content" id="einstellungen">
+        <h2>Klassen</h2>
+        <div class="note">
+          <p>Wählen Sie die Klassen aus, die für die Planung berücksichtigt werden sollen. Geben Sie für Klassen ohne
+            Jahrgangsstufe (z. B. Kurse) eine manuelle Jahrgangsstufe ein, wenn "Jahrgangsstufen aufteilen" aktiviert
+            ist.</p>
+        </div>
+        <div id="klassenContainer" class="checkbox-list"></div>
+        <h2>Lehrer</h2>
+        <div class="note">
+          <p>Wählen Sie die Lehrer aus, die an den Klassenkonferenzen teilnehmen sollen. Nur ausgewählte Lehrer werden
+            in die Planung einbezogen.</p>
+        </div>
+        <div id="lehrerContainer" class="checkbox-list"></div>
+        <h2>Planungsoptionen</h2>
+        <div class="note">
+          <p>Konfigurieren Sie die Planungsoptionen. Wählen Sie bevorzugte Fächer aus, um die Planung zu priorisieren.
+          </p>
+        </div>
+        <div class="einstellungen">
+          <label for="maxSlots">Maximale Anzahl der Zeitslots:</label>
+          <input type="number" id="maxSlots" value="10" min="1" max="50" /><br /><br />
+          <label for="maxKlassenProSlot">Maximale Anzahl der parallelen Klassenkonferenzen pro Zeitslot:</label>
+          <input type="number" id="maxKlassenProSlot" value="5" min="1" max="100" /><br /><br />
+          <label for="anwesendQuote">Mindestanwesenheitsquote einer Konferenz (0–1):</label>
+          <input type="number" id="anwesendQuote" value="0.5" step="0.05" min="0" max="1" /><br /><br />
+          <label><input type="checkbox" id="klassenleiterPflicht" checked /> Klassenleiter in eigene Klasse
+            verplanen</label><br />
+          <label><input type="checkbox" id="einerProJahrgang" checked /> Klassen einer Jahrgangsstufe auf alle Zeitslots
+            aufteilen</label><br /><br />
+          <h2>Bevorzugte Fächer auswählen</h2>
+          <div id="faecherContainer" class="checkbox-list"></div>
+        </div>
+      </div>
+      <div class="tab-content" id="planung">
+        <h2>Planung</h2>
+        <div class="note">
+          <p>Erstellen Sie den Plan. Überprüfen Sie die Ergebnisse, verschieben Sie Klassen oder Lehrer bei Bedarf, und
+            exportieren Sie den Plan als CSV.</p>
+        </div>
+        <div class="planungButtons">
+          <button id="planBtn">Plan erstellen</button>
+          <button id="exportBtn">Plan exportieren</button>
+          <button id="exportLehrerBtn">Lehrerplan exportieren</button>
+        </div>
+        <label for="maxVersucheSlider">Max.&nbsp;<span id="maxVersucheValue"> 1000</span>&nbsp;Versuche
+        </label>
+        <input type="range" id="maxVersucheSlider" min="500" max="5000" value="500" step="500" />
+        <div id="planOutput"></div>
+
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slider = document.getElementById('maxVersucheSlider');
+    const output = document.getElementById('maxVersucheValue');
+
+    output.textContent = slider.value;
+    slider.addEventListener('input', () => {
+      output.textContent = slider.value;
+    });
+  </script>
+</body>
+
+</html>

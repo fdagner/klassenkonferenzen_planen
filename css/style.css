@@ -1,0 +1,716 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f5f6f5;
+    color: #333;
+}
+
+.container {
+    width: 1000px;
+    margin: 0 auto;
+}
+
+.hidden {
+    display: none;
+}
+
+h1 {
+    color: #007bff;
+    margin-bottom: 20px;
+}
+
+/* Listen in Zellen */
+#planOutput ul {
+    margin: 0;
+    padding-left: 10px;
+    list-style-type: disc;
+    list-style-position: outside;
+    list-style: none;
+}
+
+#planOutput li {
+    margin-bottom: 2mm;
+}
+
+.file-upload {
+    margin-bottom: 20px;
+}
+
+.file-upload label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+    color: #2c3e50;
+}
+
+.file-upload input[type="file"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    width: 100%;
+    max-width: 300px;
+}
+
+#optionen {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    display: none;
+}
+
+#uploadTabContent {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 2px solid #ccc;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 12px;
+    text-align: center;
+    background-color: #e9ecef;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    color: #495057;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.tab-button:hover {
+    background-color: #d1d4d7;
+}
+
+.tab-button.active {
+    background-color: #fff;
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+}
+
+.tab-button.hidden {
+    display: none;
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.checkbox-list {
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #fff;
+    margin-bottom: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.checkbox-list label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.checkbox-list input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+/* css/style.css */
+details {
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+summary {
+    cursor: pointer;
+    font-weight: bold;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+}
+
+details[open] summary {
+    background-color: #9ed0ff;
+}
+
+/* Styling für die Anleitung als Notiz */
+.note {
+    background-color: #e8f4ff;
+    /* Hellblauer Hintergrund */
+    border-left: 4px solid #007bff;
+    /* Blauer Akzentstreifen links */
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.note p {
+    margin: 0;
+    /* Entfernt Standard-Margin von Absätzen */
+    color: #333;
+    /* Dunkle Textfarbe für bessere Lesbarkeit */
+}
+
+.image-effect {
+    max-width: 50%; /* Bild passt sich der Containergröße an */
+    height: auto;
+    display: block;
+    border-radius: 10px; /* Abgerundete Ecken */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Leichter Schatten */
+    transition: all 0.3s ease-in-out; /* Sanfte Animation */
+    margin: 0 auto; /* Zentriert das Bild horizontal */
+    margin-bottom: 20px;
+}
+
+/* Hover-Effekt */
+.image-effect:hover {
+    transform: scale(1.05); /* Leichte Vergrößerung */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Stärkerer Schatten */
+    filter: brightness(1.1); /* Bild wird etwas heller */
+}
+
+/* Größere Checkboxes für Klassen, Lehrer und Fächer */
+.klasseCheckbox,
+.lehrerCheckbox,
+.fachCheckbox {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Optional: Styling für das Label, um die Lesbarkeit zu verbessern */
+label {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+/* Optional: Styling für den hover-Effekt */
+.klasseCheckbox:hover,
+.lehrerCheckbox:hover,
+.fachCheckbox:hover {
+    cursor: pointer;
+    outline: 1px solid #007bff;
+    /* Blauer Rahmen bei Hover */
+}
+
+.jahrgang-input {
+    margin-left: 20px;
+}
+
+.jahrgang-input input[type="number"] {
+    width: 80px;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.einstellungen {
+    border: 1px solid #ccc;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.einstellungen h2 {
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.einstellungen label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.einstellungen input[type="number"] {
+    width: 100px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.einstellungen input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+#planBtn,
+#exportBtn {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    display: block;
+    margin: 10px 0;
+}
+
+#exportBtn {
+    display: none;
+    background-color: #fe15db;
+}
+
+#planBtn:hover,
+#exportBtn:hover {
+    background-color: #0056b3;
+}
+
+#exportBtn:hover {
+    background-color: #970181;
+}
+
+.planungButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    hyphens: auto;
+}
+
+th,
+td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    vertical-align: top;
+    hyphens: auto;
+}
+
+th {
+    background: #e9ecef;
+    text-align: left;
+    font-weight: bold;
+}
+
+.info {
+    background: #d4edda;
+    border: 1px solid #28a745;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.warnungen {
+    background: #ffdcdc;
+    border: 1px solid #ff0000;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.slot-changer {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 14px;
+}
+
+.slot-changer:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+#exportLehrerBtn {
+    background-color: #28a745;
+    /* Grün, um es vom blauen Export-Button zu unterscheiden */
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    display: none;
+    /* Versteckt, bis ein Plan erstellt wurde */
+    margin: 10px 0;
+}
+
+#exportLehrerBtn:hover {
+    background-color: #218838;
+}
+
+em {
+    color: #999;
+}
+
+.doppelter-lehrer {
+    color: red;
+}
+
+.move-teacher-left,
+.move-teacher-right {
+    text-decoration: none;
+    color: #007bff;
+    cursor: pointer;
+}
+
+.move-teacher-left:hover,
+.move-teacher-right:hover {
+    color: #0056b3;
+}
+
+.csv-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+
+.csv-table th,
+.csv-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+.csv-table input {
+    width: 100%;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.csv-table th {
+    background: #e9ecef;
+    font-weight: bold;
+}
+
+.delete-row-btn {
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.delete-row-btn:hover {
+    background: #cc0000;
+}
+
+.save-btn {
+    background-color: #28a745;
+    color: #fff;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.save-btn:hover {
+    background-color: #218838;
+}
+
+.add-row-btn {
+    background-color: #007bff;
+    color: #fff;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+.add-row-btn:hover {
+    background-color: #0056b3;
+}
+
+.loading-indicator {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.loading-indicator.active {
+    display: block;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-indicator p {
+    margin: 0;
+    font-size: 16px;
+    color: #2c3e50;
+}
+
+.reset-btn {
+    background-color: #dc3545;
+    color: #fff;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.reset-btn:hover {
+    background-color: #c82333;
+}
+
+.message-box {
+    margin-top: 1em;
+    padding: 1em;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+.message-box .success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message-box .error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.message-box .warning {
+    background-color: #ffea9c;
+    /* Yellow color */
+    color: #856705;
+    margin: 5px 0;
+}
+
+.faq-container {
+    max-width: 800px;
+    margin: 2em auto;
+    padding: 1em;
+    font-family: Arial, sans-serif;
+}
+
+
+.faq-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 0.5em;
+    overflow: hidden;
+}
+
+.faq-item summary {
+    padding: 1em;
+    background-color: #e8f4ff;
+    cursor: pointer;
+    font-weight: bold;
+    color: #000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.faq-item summary::-webkit-details-marker {
+    display: none;
+    /* Entfernt das Standard-Dreieck in Webkit-Browsern */
+}
+
+.faq-item summary::after {
+    content: '▼';
+    transition: transform 0.3s ease;
+}
+
+.faq-item[open] summary::after {
+    transform: rotate(180deg);
+}
+
+.faq-content {
+    padding: 1em;
+    background-color: #fff;
+    line-height: 1.6;
+}
+
+.faq-content p, .faq-content ul, .faq-content pre {
+    margin: 0.5em 0;
+}
+
+.faq-content ul {
+    padding-left: 1.5em;
+}
+
+.faq-content pre {
+    background-color: #f8f8f8;
+    padding: 1em;
+    border-radius: 5px;
+    overflow-x: auto;
+}
+
+.faq-content code {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+@media print {
+
+
+    /* Grundlegende Druckformatierung */
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        font-size: 12pt;
+        color: #000;
+        background-color: #fff;
+    }
+
+    .container {
+        max-width: 100%;
+        margin: 0;
+        padding: 20mm;
+    }
+
+    h1 {
+        font-size: 16pt;
+        text-align: center;
+        margin-bottom: 20mm;
+        page-break-after: avoid;
+    }
+
+    /* Warnungen und Statistiken */
+    .warnungen,
+    .info {
+        margin-bottom: 20mm;
+        page-break-after: always;
+        border: none;
+        background: none;
+        padding: 0;
+    }
+
+    .warnungen ul,
+    .info p {
+        margin: 0;
+        padding: 0;
+        font-size: 10pt;
+    }
+
+    /* Formatierung für Slots und Klassen */
+    h3 {
+        font-size: 14pt;
+        margin: 0 0 10mm 0;
+        page-break-before: always;
+        page-break-after: avoid;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 0;
+        box-shadow: none;
+        page-break-inside: avoid;
+    }
+
+    th,
+    td {
+        border: 1px solid #000;
+        padding: 8mm;
+        text-align: left;
+        font-size: 10pt;
+        vertical-align: top;
+    }
+
+    th {
+        background: #f0f0f0;
+        font-weight: bold;
+    }
+
+    /* Entferne die Spalte "Slot ändern" */
+    th:nth-child(7),
+    td:nth-child(7) {
+        display: none;
+    }
+
+    /* Jede Klasse auf einer eigenen Seite */
+    tr {
+        page-break-after: always;
+        page-break-inside: avoid;
+    }
+
+    /* Listen in Zellen */
+    ul {
+        margin: 0;
+        padding-left: 15mm;
+        list-style-type: disc;
+        list-style-position: outside;
+        list-style: none;
+    }
+
+    li {
+        margin-bottom: 2mm;
+    }
+
+    .doppelter-lehrer {
+        color: #000;
+        font-weight: bold;
+    }
+
+    em {
+        color: #666;
+        font-style: italic;
+    }
+
+    /* Entferne Schatten und unnötige Hintergründe */
+    table,
+    .warnungen,
+    .info {
+        box-shadow: none;
+    }
+}
