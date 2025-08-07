@@ -23,22 +23,22 @@ function addStatusMessage(message, isError = false, isWarning = false) {
 
   // Erstelle Nachricht mit Zeitstempel
   const messageWithTimestamp = `[${timestamp}] ${message}`;
-  
+
   // Lade bestehende Nachrichten aus localStorage
   const storedMessages = getFromLocalStorage('csvMessages') ? JSON.parse(getFromLocalStorage('csvMessages')) : [];
-  
+
   // Füge neue Nachricht am Anfang hinzu (für umgekehrte Reihenfolge)
   storedMessages.unshift({ text: messageWithTimestamp, isError, isWarning });
-  
+
   // Speichere die aktualisierten Nachrichten
   saveToLocalStorage('csvMessages', JSON.stringify(storedMessages));
-  
+
   // Aktualisiere das UI mit der entsprechenden Klasse
   csvMessageDiv.innerHTML = storedMessages
     .map(msg => `<p class="${msg.isWarning ? 'warning' : msg.isError ? 'error' : 'success'}">${msg.text}</p>`)
     .join('');
-  
-  
+
+
   // Scrolle zum Ende des Message-Divs
   csvMessageDiv.scrollTop = csvMessageDiv.scrollHeight;
 }
@@ -50,10 +50,10 @@ const parseCSVLine = (line) => {
   const result = [];
   let current = '';
   let inQuotes = false;
-  
+
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
-    
+
     if (char === '"') {
       inQuotes = !inQuotes;
     } else if (char === ',' && !inQuotes) {
@@ -63,7 +63,7 @@ const parseCSVLine = (line) => {
       current += char;
     }
   }
-  
+
   result.push(current.trim());
   return result;
 };
@@ -197,7 +197,7 @@ async function ladeGespeicherteCSV(changedFile = null) {
   let unterrichtError = false;
   if (unterrichtCSV) {
     const lines = unterrichtCSV.split('\n').filter(line => line.trim());
-    
+
     if (lines.length < 2) {
       if (changedFile === 'unterricht') {
         addStatusMessage('Unterrichts-Datei enthält keine Datenzeilen.', true);
@@ -210,7 +210,7 @@ async function ladeGespeicherteCSV(changedFile = null) {
       const klasseIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'klasse');
       const fachIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'fach');
       const lehrkraftIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'lehrkraft');
-      
+
       // Überprüfe, ob alle benötigten Spalten gefunden wurden
       if (klasseIndex === -1 || fachIndex === -1 || lehrkraftIndex === -1) {
         if (changedFile === 'unterricht') {
@@ -228,18 +228,18 @@ async function ladeGespeicherteCSV(changedFile = null) {
         for (let i = 1; i < lines.length; i++) {
           const line = lines[i];
           const columns = parseCSVLine(line);
-          
+
           const klasse = columns[klasseIndex] ? columns[klasseIndex].replace(/"/g, '').trim() : '';
           const fach = columns[fachIndex] ? columns[fachIndex].replace(/"/g, '').trim() : '';
           const lehrkraft = columns[lehrkraftIndex] ? columns[lehrkraftIndex].replace(/"/g, '').trim() : '';
-          
+
           if (!klasse || !fach || !lehrkraft) {
             if (changedFile === 'unterricht') {
               addStatusMessage(`Ungültige Daten in Unterrichts-CSV, Zeile ${i + 1}: Klasse, Fach oder Lehrkraft fehlt oder ist ungültig.`, false, true); // isWarning = true
             }
             continue;
           }
-          
+
           neueFaecher.add(fach);
           neueKlassen.add(klasse);
           neueLehrer.add(lehrkraft);
@@ -253,7 +253,7 @@ async function ladeGespeicherteCSV(changedFile = null) {
               manuellerJahrgang: null,
             };
           }
-          
+
           state.klassenMap[klasse].lehrerSet.add(lehrkraft);
           if (!state.klassenMap[klasse].lehrerFaecher.has(lehrkraft)) {
             state.klassenMap[klasse].lehrerFaecher.set(lehrkraft, new Set());
@@ -280,95 +280,95 @@ async function ladeGespeicherteCSV(changedFile = null) {
   }
 
   // Verarbeitung der Klassenleiter-CSV (mit Änderung für warning)
-// Verarbeitung der Klassenleiter-CSV
-const klassenleiterCSV = getFromLocalStorage('klassenleiterCSV');
-if (klassenleiterCSV) {
-  const lines = klassenleiterCSV.split('\n').filter(line => line.trim());
-  
-  if (lines.length < 2) {
-    if (changedFile === 'klassenleiter') {
-      addStatusMessage('Klassenleiter-Datei enthält keine Datenzeilen.', true);
-    }
-    state.klassenleiterLoaded = false;
-  } else {
-    // Parse Header-Zeile und finde Spalten-Indizes
-    const headerColumns = parseCSVLine(lines[0]);
-    const klasseIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'klasse');
-    const klassenleitungIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'klassenleitung');
-    
-    // Überprüfe, ob alle benötigten Spalten gefunden wurden
-    if (klasseIndex === -1 || klassenleitungIndex === -1) {
+  // Verarbeitung der Klassenleiter-CSV
+  const klassenleiterCSV = getFromLocalStorage('klassenleiterCSV');
+  if (klassenleiterCSV) {
+    const lines = klassenleiterCSV.split('\n').filter(line => line.trim());
+
+    if (lines.length < 2) {
       if (changedFile === 'klassenleiter') {
-        const missingColumns = [];
-        if (klasseIndex === -1) missingColumns.push('Klasse');
-        if (klassenleitungIndex === -1) missingColumns.push('Klassenleitung');
-        addStatusMessage(`Fehler beim Laden der Klassenleiter-Datei: Spalte(n) ${missingColumns.join(', ')} nicht gefunden.`, true);
+        addStatusMessage('Klassenleiter-Datei enthält keine Datenzeilen.', true);
       }
       state.klassenleiterLoaded = false;
     } else {
-      // Überprüfung auf doppelte Klassen
-      const klassenGesehen = new Set();
-      const doppelteKlassen = new Set();
-      let validRows = 0;
+      // Parse Header-Zeile und finde Spalten-Indizes
+      const headerColumns = parseCSVLine(lines[0]);
+      const klasseIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'klasse');
+      const klassenleitungIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'klassenleitung');
 
-      // Verarbeite Datenzeilen
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i];
-        const columns = parseCSVLine(line);
-        
-        const klasse = columns[klasseIndex] ? columns[klasseIndex].replace(/"/g, '').trim() : '';
-        const klassenleitung = columns[klassenleitungIndex] ? columns[klassenleitungIndex].replace(/"/g, '').trim() : '';
-        
-        if (!klasse || !klassenleitung) {
-          if (changedFile === 'klassenleiter') {
-            addStatusMessage(`Ungültige Daten in Klassenleiter-Datei, Zeile ${i + 1}: Klasse oder Klassenleitung fehlt oder ist ungültig.`, false, true);
-          }
-          continue;
+      // Überprüfe, ob alle benötigten Spalten gefunden wurden
+      if (klasseIndex === -1 || klassenleitungIndex === -1) {
+        if (changedFile === 'klassenleiter') {
+          const missingColumns = [];
+          if (klasseIndex === -1) missingColumns.push('Klasse');
+          if (klassenleitungIndex === -1) missingColumns.push('Klassenleitung');
+          addStatusMessage(`Fehler beim Laden der Klassenleiter-Datei: Spalte(n) ${missingColumns.join(', ')} nicht gefunden.`, true);
         }
-        
-        // Überprüfe auf doppelte Klassen
-        if (klassenGesehen.has(klasse)) {
-          doppelteKlassen.add(klasse);
-        } else {
-          klassenGesehen.add(klasse);
-        }
-        
-        neueKlassen.add(klasse);
-        neueLehrer.add(klassenleitung);
-        
-        if (!state.klassenMap[klasse]) {
-          state.klassenMap[klasse] = {
-            name: klasse,
-            kl: null,
-            lehrerSet: new Set(),
-            lehrerFaecher: new Map(),
-            manuellerJahrgang: null,
-          };
-        }
-        state.klassenMap[klasse].kl = klassenleitung;
-        validRows++;
-      }
-
-      // Warnung für doppelte Klassen
-      if (doppelteKlassen.size > 0 && changedFile === 'klassenleiter') {
-        addStatusMessage(`Warnung: Folgende Klassen kommen in der Klassenleiter-Datei mehrfach vor: ${Array.from(doppelteKlassen).join(', ')}. Nur die letzte Zuordnung wird verwendet.`, false, true);
-      }
-
-      state.klassenleiterLoaded = validRows > 0;
-      if (changedFile === 'klassenleiter' && validRows > 0) {
-        addStatusMessage('Klassenleiter erfolgreich geladen.');
-      } else if (changedFile === 'klassenleiter' && validRows === 0) {
-        addStatusMessage('Klassenleiter enthält keine gültigen Datenzeilen.', true);
         state.klassenleiterLoaded = false;
+      } else {
+        // Überprüfung auf doppelte Klassen
+        const klassenGesehen = new Set();
+        const doppelteKlassen = new Set();
+        let validRows = 0;
+
+        // Verarbeite Datenzeilen
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i];
+          const columns = parseCSVLine(line);
+
+          const klasse = columns[klasseIndex] ? columns[klasseIndex].replace(/"/g, '').trim() : '';
+          const klassenleitung = columns[klassenleitungIndex] ? columns[klassenleitungIndex].replace(/"/g, '').trim() : '';
+
+          if (!klasse || !klassenleitung) {
+            if (changedFile === 'klassenleiter') {
+              addStatusMessage(`Ungültige Daten in Klassenleiter-Datei, Zeile ${i + 1}: Klasse oder Klassenleitung fehlt oder ist ungültig.`, false, true);
+            }
+            continue;
+          }
+
+          // Überprüfe auf doppelte Klassen
+          if (klassenGesehen.has(klasse)) {
+            doppelteKlassen.add(klasse);
+          } else {
+            klassenGesehen.add(klasse);
+          }
+
+          neueKlassen.add(klasse);
+          neueLehrer.add(klassenleitung);
+
+          if (!state.klassenMap[klasse]) {
+            state.klassenMap[klasse] = {
+              name: klasse,
+              kl: null,
+              lehrerSet: new Set(),
+              lehrerFaecher: new Map(),
+              manuellerJahrgang: null,
+            };
+          }
+          state.klassenMap[klasse].kl = klassenleitung;
+          validRows++;
+        }
+
+        // Warnung für doppelte Klassen
+        if (doppelteKlassen.size > 0 && changedFile === 'klassenleiter') {
+          addStatusMessage(`Folgende Klassen kommen in der Klassenleiter-Datei mehrfach vor: ${Array.from(doppelteKlassen).join(', ')}. Nur die letzte Zuordnung wird verwendet.`, false, true);
+        }
+
+        state.klassenleiterLoaded = validRows > 0;
+        if (changedFile === 'klassenleiter' && validRows > 0) {
+          addStatusMessage('Klassenleiter erfolgreich geladen.');
+        } else if (changedFile === 'klassenleiter' && validRows === 0) {
+          addStatusMessage('Klassenleiter enthält keine gültigen Datenzeilen.', true);
+          state.klassenleiterLoaded = false;
+        }
       }
     }
+  } else {
+    state.klassenleiterLoaded = false;
+    if (changedFile === 'klassenleiter') {
+      addStatusMessage('Keine Klassenleiter-Daten vorhanden.', true);
+    }
   }
-} else {
-  state.klassenleiterLoaded = false;
-  if (changedFile === 'klassenleiter') {
-    addStatusMessage('Keine Klassenleiter-Daten vorhanden.', true);
-  }
-}
 
   // Rest der Funktion bleibt unverändert
   // Bereinige state.klassenMap: Entferne Klassen, die nicht mehr in den CSV-Dateien existieren
@@ -465,37 +465,37 @@ async function zeigeCSVBearbeitung() {
       unterrichtTable.innerHTML = createTableHTML(['Klasse', 'Fach', 'Lehrkraft', 'Aktion'], 'unterrichtCSVBody');
       const unterrichtBody = document.getElementById('unterrichtCSVBody');
       const unterrichtLines = unterrichtCSV.split('\n').filter(line => line.trim());
-      
+
       if (unterrichtLines.length < 2) return;
-      
+
       // Parse Header und finde Spalten-Indizes
       const headerColumns = parseCSVLine(unterrichtLines[0]);
       const klasseIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'klasse');
       const fachIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'fach');
       const lehrkraftIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'lehrkraft');
-      
+
       if (klasseIndex === -1 || fachIndex === -1 || lehrkraftIndex === -1) {
         unterrichtTable.innerHTML = '<p class="no-data-hint">Fehler: Benötigte Spalten (Klasse, Fach, Lehrkraft) nicht gefunden.</p>';
         return;
       }
-      
+
       // Verarbeite die Daten und zeige sie in vereinfachter Form
       const processedData = [];
       for (let i = 1; i < unterrichtLines.length; i++) {
         const line = unterrichtLines[i];
         const columns = parseCSVLine(line);
-        
+
         const klasse = columns[klasseIndex] ? columns[klasseIndex].replace(/"/g, '').trim() : '';
         const fach = columns[fachIndex] ? columns[fachIndex].replace(/"/g, '').trim() : '';
         const lehrkraft = columns[lehrkraftIndex] ? columns[lehrkraftIndex].replace(/"/g, '').trim() : '';
-        
+
         if (klasse && fach && lehrkraft) {
           processedData.push({ klasse, fach, lehrkraft, originalIndex: i });
         }
       }
-      
-unterrichtBody.innerHTML = processedData.map((data, index) => {
-  return `
+
+      unterrichtBody.innerHTML = processedData.map((data, index) => {
+        return `
     <tr data-row-id="${data.originalIndex}">
       <td><input type="text" value="${data.klasse}" data-row="${data.originalIndex}" data-field="klasse" placeholder="Klasse"></td>
       <td><input type="text" value="${data.fach}" data-row="${data.originalIndex}" data-field="fach" placeholder="Fach"></td>
@@ -503,8 +503,8 @@ unterrichtBody.innerHTML = processedData.map((data, index) => {
       <td><button class="delete-row-btn" data-row="${data.originalIndex}" data-table="unterricht">Löschen</button></td>
     </tr>
   `;
-}).join('');
-      
+      }).join('');
+
       // Buttons sichtbar machen
       if (addUnterrichtRow) addUnterrichtRow.style.display = 'inline-block';
       if (saveUnterrichtCSV) saveUnterrichtCSV.style.display = 'inline-block';
@@ -531,43 +531,43 @@ unterrichtBody.innerHTML = processedData.map((data, index) => {
       klassenleiterTable.innerHTML = createTableHTML(['Klasse', 'Klassenleitung', 'Aktion'], 'klassenleiterCSVBody');
       const klassenleiterBody = document.getElementById('klassenleiterCSVBody');
       const klassenleiterLines = klassenleiterCSV.split('\n').filter(line => line.trim());
-      
+
       if (klassenleiterLines.length < 2) return;
-      
+
       // Parse Header und finde Spalten-Indizes
       const headerColumns = parseCSVLine(klassenleiterLines[0]);
       const klasseIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'klasse');
       const klassenleitungIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'klassenleitung');
-      
+
       if (klasseIndex === -1 || klassenleitungIndex === -1) {
         klassenleiterTable.innerHTML = '<p class="no-data-hint">Fehler: Benötigte Spalten (Klasse, Klassenleitung) nicht gefunden.</p>';
         return;
       }
-      
+
       // Verarbeite die Daten und zeige sie in vereinfachter Form
       const processedKlassenleiterData = [];
       for (let i = 1; i < klassenleiterLines.length; i++) {
         const line = klassenleiterLines[i];
         const columns = parseCSVLine(line);
-        
+
         const klasse = columns[klasseIndex] ? columns[klasseIndex].replace(/"/g, '').trim() : '';
         const klassenleitung = columns[klassenleitungIndex] ? columns[klassenleitungIndex].replace(/"/g, '').trim() : '';
-        
+
         if (klasse && klassenleitung) {
           processedKlassenleiterData.push({ klasse, klassenleitung, originalIndex: i });
         }
       }
-      
-klassenleiterBody.innerHTML = processedKlassenleiterData.map((data, index) => {
-  return `
+
+      klassenleiterBody.innerHTML = processedKlassenleiterData.map((data, index) => {
+        return `
     <tr data-row-id="${data.originalIndex}">
       <td><input type="text" value="${data.klasse}" data-row="${data.originalIndex}" data-field="klasse" placeholder="Klasse"></td>
       <td><input type="text" value="${data.klassenleitung}" data-row="${data.originalIndex}" data-field="klassenleitung" placeholder="Klassenleitung"></td>
       <td><button class="delete-row-btn" data-row="${data.originalIndex}" data-table="klassenleiter">Löschen</button></td>
     </tr>
   `;
-}).join('');
-      
+      }).join('');
+
       // Buttons sichtbar machen
       if (addKlassenleiterRow) addKlassenleiterRow.style.display = 'inline-block';
       if (saveKlassenleiterCSV) saveKlassenleiterCSV.style.display = 'inline-block';
@@ -719,7 +719,7 @@ function saveCSV(tableBodyId, storageKey, fields, alertMessage) {
     });
 
     if (doppelteKlassen.size > 0) {
-      const warningMessage = `Warnung: Folgende Klassen kommen in der Klassenleiter-Tabelle mehrfach vor: ${Array.from(doppelteKlassen).join(
+      const warningMessage = `Folgende Klassen kommen in der Klassenleiter-Tabelle mehrfach vor: ${Array.from(doppelteKlassen).join(
         ', '
       )}. Bitte korrigieren Sie die Eingaben, bevor Sie speichern.`;
       addStatusMessage(warningMessage, false, true);
@@ -772,9 +772,8 @@ function saveCSV(tableBodyId, storageKey, fields, alertMessage) {
       alert(alertMessage); // Zeige Alert für erfolgreiches Speichern
     });
   }).catch(error => {
-    const errorMessage = `Fehler beim Speichern der ${
-      storageKey === 'unterrichtCSV' ? 'Unterrichts' : 'Klassenleiter'
-    }-Daten: ${error.message}`;
+    const errorMessage = `Fehler beim Speichern der ${storageKey === 'unterrichtCSV' ? 'Unterrichts' : 'Klassenleiter'
+      }-Daten: ${error.message}`;
     console.error(`saveCSV: Fehler beim Aktualisieren nach Speichern:`, error);
     addStatusMessage(errorMessage, true);
     alert(errorMessage); // Zeige Alert für Fehler
@@ -814,7 +813,7 @@ function versuchePlanung(maxSlots, maxKlassenProSlot, anwesendQuote, klassenleit
   const plan = Array(maxSlots).fill().map(() => []);
   const warnungen = [];
 
-   const klassenListe = selectedKlassen.map(name => state.klassenMap[name]).sort((a, b) => {
+  const klassenListe = selectedKlassen.map(name => state.klassenMap[name]).sort((a, b) => {
     const lehrerMitBevorzugtemFachA = Array.from(a.lehrerSet).filter(l =>
       state.anwesendeLehrer.has(l) && setHasAny(a.lehrerFaecher.get(l) || new Set(), state.bevorzugteFaecher)
     ).length;
@@ -895,12 +894,12 @@ function versuchePlanung(maxSlots, maxKlassenProSlot, anwesendQuote, klassenleit
     }
 
     if (!slotGefunden) {
-      warnungen.push(`Für Klasse ${klasse.name} konnte kein passender Slot gefunden werden${klassenleiterPflicht && klassenleiter ? ` (Klassenleiter ${klassenleiter} nicht verfügbar)` : ''}.`);
+      warnungen.push(`Für Klasse ${klasse.name} konnte kein passender Slot gefunden werden${klassenleiterPflicht && klassenleiter ? ` (Klassenleiter ${klassenleiter} anderweitig verplant)` : ''}.`);
     } else if (einerProJahrgang && !jahrgang) {
       warnungen.push(`Klasse ${klasse.name} hat keinen Jahrgang zugewiesen (wird ohne Jahrgangsbeschränkung verplant).`);
     }
   });
-  
+
   for (let slot = 0; slot < maxSlots; slot++) {
     const besetzt = belegung[slot];
     const slotKlassen = plan[slot];
@@ -1017,9 +1016,9 @@ function zeigeErgebnis(ergebnis) {
 
       const moeglichHTML = moeglich.length > 0
         ? `<ul>${moeglich.map(l => {
-            const faecher = kl.lehrerFaecher.get(l) ? Array.from(kl.lehrerFaecher.get(l)).join(', ') : '';
-            return `<li><a href="#" class="move-teacher-left print-hidden" data-slot="${slotIndex}" data-klasse="${e.klasse}" data-lehrer="${l}">←</a> ${l}${faecher ? ` (${faecher})` : ''}</li>`;
-          }).join('')}</ul>`
+          const faecher = kl.lehrerFaecher.get(l) ? Array.from(kl.lehrerFaecher.get(l)).join(', ') : '';
+          return `<li><a href="#" class="move-teacher-left print-hidden" data-slot="${slotIndex}" data-klasse="${e.klasse}" data-lehrer="${l}">←</a> ${l}${faecher ? ` (${faecher})` : ''}</li>`;
+        }).join('')}</ul>`
         : '<em>Keine</em>';
 
       const dropdownHTML = `<select class="slot-changer print-hidden" data-klasse="${e.klasse}" data-current-slot="${slotIndex}">${Array.from({ length: maxSlots }, (_, i) => `<option value="${i}"${i === slotIndex ? ' selected' : ''}>Slot ${i + 1}</option>`).join('')}</select>`;
@@ -1044,7 +1043,7 @@ function zeigeErgebnis(ergebnis) {
 
 function addSlotChangeListeners(plan, ergebnis) {
   document.querySelectorAll('.slot-changer').forEach(select => {
-    select.addEventListener('change', function() {
+    select.addEventListener('change', function () {
       const klasse = this.dataset.klasse;
       const currentSlot = parseInt(this.dataset.currentSlot);
       const newSlot = parseInt(this.value);
@@ -1268,7 +1267,7 @@ function updateFaecherUI() {
 
 // Event-Listener
 document.addEventListener('DOMContentLoaded', async () => {
-console.log('DOMContentLoaded ausgelöst');
+  console.log('DOMContentLoaded ausgelöst');
 
   const details = document.querySelectorAll('.faq-item');
 
@@ -1284,6 +1283,22 @@ console.log('DOMContentLoaded ausgelöst');
       }
     });
   });
+
+  console.log('Lade gespeicherte Daten...');
+  await ladeGespeicherteCSV(); // Kein changedFile, da Initialisierung
+  console.log('Lade Planungsoptionen...');
+  ladePlanungsoptionen();
+  console.log('Zeige CSV-Bearbeitung...');
+  await zeigeCSVBearbeitung();
+  console.log('Aktualisiere UI...');
+  updateUI();
+
+  // Zeige gespeicherten Plan, falls vorhanden
+  if (state.aktuellerPlan) {
+    console.log('Zeige gespeicherten Plan...');
+    activateTab('planung'); // Aktiviere den Planungstab
+    zeigeErgebnis(state.aktuellerPlan);
+  }
 
   const loadingIndicator = document.getElementById('loadingIndicator');
   if (loadingIndicator) {
@@ -1331,7 +1346,7 @@ console.log('DOMContentLoaded ausgelöst');
     }
   });
 
-    document.addEventListener('change', (e) => {
+  document.addEventListener('change', (e) => {
     if (
       e.target.classList.contains('klasseCheckbox') ||
       e.target.classList.contains('lehrerCheckbox') ||
@@ -1352,135 +1367,135 @@ console.log('DOMContentLoaded ausgelöst');
 
   console.log('Event-Listener für Tab-Buttons hinzugefügt');
 
-const unterrichtInput = document.getElementById('unterrichtInput');
-if (unterrichtInput) {
-  console.log('unterrichtInput gefunden');
-  unterrichtInput.addEventListener('change', async (e) => {
-    console.log('unterrichtInput change-Event ausgelöst');
-    const file = e.target.files[0];
-    if (!file) {
-      console.log('Keine Datei ausgewählt');
-      addStatusMessage('Keine Unterrichts-Datei ausgewählt.', true);
-      return;
-    }
+  const unterrichtInput = document.getElementById('unterrichtInput');
+  if (unterrichtInput) {
+    console.log('unterrichtInput gefunden');
+    unterrichtInput.addEventListener('change', async (e) => {
+      console.log('unterrichtInput change-Event ausgelöst');
+      const file = e.target.files[0];
+      if (!file) {
+        console.log('Keine Datei ausgewählt');
+        addStatusMessage('Keine Unterrichts-Datei ausgewählt.', true);
+        return;
+      }
 
-    if (loadingIndicator) loadingIndicator.classList.add('active');
+      if (loadingIndicator) loadingIndicator.classList.add('active');
 
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      console.log('Unterrichts geladen:', ev.target.result);
-      saveToLocalStorage('unterrichtCSV', ev.target.result.trim());
-      state.unterrichtLoaded = true;
-      await ladeGespeicherteCSV('unterricht'); // Übergib 'unterricht' als changedFile
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        console.log('Unterrichts geladen:', ev.target.result);
+        saveToLocalStorage('unterrichtCSV', ev.target.result.trim());
+        state.unterrichtLoaded = true;
+        await ladeGespeicherteCSV('unterricht'); // Übergib 'unterricht' als changedFile
+        updateUI();
+        if (loadingIndicator) loadingIndicator.classList.remove('active');
+      };
+      reader.onerror = () => {
+        addStatusMessage('Fehler beim Lesen der Unterrichts-Datei.', true);
+        if (loadingIndicator) loadingIndicator.classList.remove('active');
+      };
+      reader.readAsText(file, 'utf-8');
+    });
+  } else {
+    console.error("Element mit ID 'unterrichtInput' wurde nicht gefunden.");
+  }
+
+  const klassenleiterInput = document.getElementById('klassenleiterInput');
+  if (klassenleiterInput) {
+    console.log('klassenleiterInput gefunden');
+    klassenleiterInput.addEventListener('change', async (e) => {
+      console.log('klassenleiterInput change-Event ausgelöst');
+      const file = e.target.files[0];
+      if (!file) {
+        console.log('Keine Datei ausgewählt');
+        addStatusMessage('Keine Klassenleiter-Datei ausgewählt.', true);
+        return;
+      }
+
+      if (loadingIndicator) loadingIndicator.classList.add('active');
+
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        console.log('Klassenleiter geladen:', ev.target.result);
+        saveToLocalStorage('klassenleiterCSV', ev.target.result.trim());
+        state.klassenleiterLoaded = true;
+        await ladeGespeicherteCSV('klassenleiter'); // Übergib 'klassenleiter' als changedFile
+        updateUI();
+        if (loadingIndicator) loadingIndicator.classList.remove('active');
+      };
+      reader.onerror = () => {
+        addStatusMessage('Fehler beim Lesen der Klassenleiter-Datei.', true);
+        if (loadingIndicator) loadingIndicator.classList.remove('active');
+      };
+      reader.readAsText(file, 'utf-8');
+    });
+  } else {
+    console.error("Element mit ID 'klassenleiterInput' wurde nicht gefunden.");
+  }
+
+  const resetCSV = document.getElementById('resetCSV');
+  if (resetCSV) {
+    resetCSV.addEventListener('click', () => {
+      localStorage.removeItem('unterrichtCSV');
+      localStorage.removeItem('klassenleiterCSV');
+      localStorage.removeItem('planDaten');
+      localStorage.removeItem('auswahlDaten');
+      localStorage.removeItem('csvMessages'); // Entferne Log-Meldungen
+      state.unterrichtLoaded = false;
+      state.klassenleiterLoaded = false;
+      state.aktuellerPlan = null;
+      state.anwesendeLehrer = new Set();
+      state.bevorzugteFaecher = new Set();
+      state.lehrerSet.clear();
+      state.faecherSet.clear();
+      state.klassenMap = {};
       updateUI();
-      if (loadingIndicator) loadingIndicator.classList.remove('active');
-    };
-    reader.onerror = () => {
-      addStatusMessage('Fehler beim Lesen der Unterrichts-Datei.', true);
-      if (loadingIndicator) loadingIndicator.classList.remove('active');
-    };
-    reader.readAsText(file, 'utf-8');
-  });
-} else {
-  console.error("Element mit ID 'unterrichtInput' wurde nicht gefunden.");
-}
+      ladeAuswahl();
+      const planOutput = document.getElementById('planOutput');
+      if (planOutput) planOutput.innerHTML = '';
+      const exportBtn = document.getElementById('exportBtn');
+      if (exportBtn) exportBtn.style.display = 'none';
+      const exportLehrerBtn = document.getElementById('exportLehrerBtn');
+      if (exportLehrerBtn) exportLehrerBtn.style.display = 'none';
+      const csvMessageDiv = document.getElementById('csvMessage');
+      if (csvMessageDiv) csvMessageDiv.innerHTML = ''; // Leere das Message-Div
+      addStatusMessage('Alle Daten wurden zurückgesetzt.');
+    });
+  } else {
+    console.error("Element mit ID 'resetCSV' wurde nicht gefunden.");
+  }
+  const addUnterrichtRow = document.getElementById('addUnterrichtRow');
+  if (addUnterrichtRow) {
+    addUnterrichtRow.addEventListener('click', () => {
+      const unterrichtCSV = getFromLocalStorage('unterrichtCSV');
+      const lines = unterrichtCSV ? unterrichtCSV.split('\n').filter(line => line.trim()) : [];
+      addTableRow('unterrichtCSVBody', ['klasse', 'fach', 'lehrkraft'], lines.length);
+    });
+  }
 
-const klassenleiterInput = document.getElementById('klassenleiterInput');
-if (klassenleiterInput) {
-  console.log('klassenleiterInput gefunden');
-  klassenleiterInput.addEventListener('change', async (e) => {
-    console.log('klassenleiterInput change-Event ausgelöst');
-    const file = e.target.files[0];
-    if (!file) {
-      console.log('Keine Datei ausgewählt');
-      addStatusMessage('Keine Klassenleiter-Datei ausgewählt.', true);
-      return;
-    }
-
-    if (loadingIndicator) loadingIndicator.classList.add('active');
-
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      console.log('Klassenleiter geladen:', ev.target.result);
-      saveToLocalStorage('klassenleiterCSV', ev.target.result.trim());
-      state.klassenleiterLoaded = true;
-      await ladeGespeicherteCSV('klassenleiter'); // Übergib 'klassenleiter' als changedFile
-      updateUI();
-      if (loadingIndicator) loadingIndicator.classList.remove('active');
-    };
-    reader.onerror = () => {
-      addStatusMessage('Fehler beim Lesen der Klassenleiter-Datei.', true);
-      if (loadingIndicator) loadingIndicator.classList.remove('active');
-    };
-    reader.readAsText(file, 'utf-8');
-  });
-} else {
-  console.error("Element mit ID 'klassenleiterInput' wurde nicht gefunden.");
-}
-
-const resetCSV = document.getElementById('resetCSV');
-if (resetCSV) {
-  resetCSV.addEventListener('click', () => {
-    localStorage.removeItem('unterrichtCSV');
-    localStorage.removeItem('klassenleiterCSV');
-    localStorage.removeItem('planDaten');
-    localStorage.removeItem('auswahlDaten');
-    localStorage.removeItem('csvMessages'); // Entferne Log-Meldungen
-    state.unterrichtLoaded = false;
-    state.klassenleiterLoaded = false;
-    state.aktuellerPlan = null;
-    state.anwesendeLehrer = new Set();
-    state.bevorzugteFaecher = new Set();
-    state.lehrerSet.clear();
-    state.faecherSet.clear();
-    state.klassenMap = {};
-    updateUI();
-    ladeAuswahl();
-    const planOutput = document.getElementById('planOutput');
-    if (planOutput) planOutput.innerHTML = '';
-    const exportBtn = document.getElementById('exportBtn');
-    if (exportBtn) exportBtn.style.display = 'none';
-    const exportLehrerBtn = document.getElementById('exportLehrerBtn');
-    if (exportLehrerBtn) exportLehrerBtn.style.display = 'none';
-    const csvMessageDiv = document.getElementById('csvMessage');
-    if (csvMessageDiv) csvMessageDiv.innerHTML = ''; // Leere das Message-Div
-    addStatusMessage('Alle Daten wurden zurückgesetzt.');
-  });
-} else {
-  console.error("Element mit ID 'resetCSV' wurde nicht gefunden.");
-}
-const addUnterrichtRow = document.getElementById('addUnterrichtRow');
-if (addUnterrichtRow) {
-  addUnterrichtRow.addEventListener('click', () => {
-    const unterrichtCSV = getFromLocalStorage('unterrichtCSV');
-    const lines = unterrichtCSV ? unterrichtCSV.split('\n').filter(line => line.trim()) : [];
-    addTableRow('unterrichtCSVBody', ['klasse', 'fach', 'lehrkraft'], lines.length);
-  });
-}
-
-const saveUnterrichtCSV = document.getElementById('saveUnterrichtCSV');
-if (saveUnterrichtCSV) {
-  saveUnterrichtCSV.addEventListener('click', () => {
-    saveCSV('unterrichtCSVBody', 'unterrichtCSV', ['klasse', 'fach', 'lehrkraft'], 'Unterricht wurde gespeichert.');
-  });
-}
+  const saveUnterrichtCSV = document.getElementById('saveUnterrichtCSV');
+  if (saveUnterrichtCSV) {
+    saveUnterrichtCSV.addEventListener('click', () => {
+      saveCSV('unterrichtCSVBody', 'unterrichtCSV', ['klasse', 'fach', 'lehrkraft'], 'Unterricht wurde gespeichert.');
+    });
+  }
 
 
   const addKlassenleiterRow = document.getElementById('addKlassenleiterRow');
-if (addKlassenleiterRow) {
-  addKlassenleiterRow.addEventListener('click', () => {
-    const klassenleiterCSV = getFromLocalStorage('klassenleiterCSV');
-    const lines = klassenleiterCSV ? klassenleiterCSV.split('\n').filter(line => line.trim()) : [];
-    addTableRow('klassenleiterCSVBody', ['klasse', 'klassenleitung'], lines.length);
-  });
-}
+  if (addKlassenleiterRow) {
+    addKlassenleiterRow.addEventListener('click', () => {
+      const klassenleiterCSV = getFromLocalStorage('klassenleiterCSV');
+      const lines = klassenleiterCSV ? klassenleiterCSV.split('\n').filter(line => line.trim()) : [];
+      addTableRow('klassenleiterCSVBody', ['klasse', 'klassenleitung'], lines.length);
+    });
+  }
 
-const saveKlassenleiterCSV = document.getElementById('saveKlassenleiterCSV');
-if (saveKlassenleiterCSV) {
-  saveKlassenleiterCSV.addEventListener('click', () => {
-    saveCSV('klassenleiterCSVBody', 'klassenleiterCSV', ['klasse', 'klassenleitung'], 'Klassenleiter wurden gespeichert.');
-  });
-}
+  const saveKlassenleiterCSV = document.getElementById('saveKlassenleiterCSV');
+  if (saveKlassenleiterCSV) {
+    saveKlassenleiterCSV.addEventListener('click', () => {
+      saveCSV('klassenleiterCSVBody', 'klassenleiterCSV', ['klasse', 'klassenleitung'], 'Klassenleiter wurden gespeichert.');
+    });
+  }
   const einerProJahrgang = document.getElementById('einerProJahrgang');
   if (einerProJahrgang) {
     einerProJahrgang.addEventListener('change', toggleJahrgangInputs);

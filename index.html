@@ -25,7 +25,7 @@
     <div id="optionen">
       <div class="tabs">
         <button class="tab-button active" data-tab="faq">Anleitung -></button>
-        <button class="tab-button" data-tab="csvEdit">Daten -></button>
+        <button class="tab-button" data-tab="unterricht">Daten -></button>
         <button class="tab-button" data-tab="einstellungen">Optionen -></button>
         <button class="tab-button hidden" data-tab="planung" id="planungTab">Planung</button>
       </div>
@@ -39,66 +39,6 @@
             ASV-Bericht "Klassenkonferenz", bietet der Konferenzplaner eine dynamische, browserbasierte Planung mit
             direkter Datenbearbeitung.
           </div>
-        </details>
-        <details class="faq-item">
-          <summary>Welches Format müssen die Daten für Unterricht und Klassenleiter haben?</summary>
-          <div class="faq-content">
-            <p>Die Dateien verwenden Kommas als Trennzeichen und die Werte können optional in Anführungszeichen gesetzt
-              werden, um
-              Sonderzeichen zu unterstützen. Dieses Format entspricht den Exportdateien STDPLAN.txt und STDKLAS.txt der
-              ASV.</p>
-            <h3>Unterricht (entspricht zum Beispiel STDPLAN.txt)</h3>
-            <ul>
-              <li><strong>Kopfzeile</strong>: Die erste Zeile muss die Spaltenüberschriften enthalten: Klasse, Fach,
-                Lehrkraft (Reihenfolge beliebig, Groß-/Kleinschreibung wird ignoriert, Anführungsstriche optional).</li>
-              <li><strong>Datenzeilen</strong>: Jede weitere Zeile repräsentiert eine Unterrichtseinheit mit den Werten:
-                <ul>
-                  <li>Klasse: Name der Klasse (z. B. 5A, 10B).</li>
-                  <li>Fach: Name des Fachs (z. B. M, D).</li>
-                  <li>Lehrkraft: Kürzel der Lehrkraft (z. B. Mül, Sch).</li>
-                </ul>
-              </li>
-              <li><strong>Beispiel</strong>:
-                <pre>
-"Klasse","Fach","Lehrkraft"
-"5A","M","Mül"
-"5A","D","Sch"
-"6B","E","Mei"
-            </pre>
-              </li>
-            </ul>
-            <h3>Klassenleiter (entspricht zum Beispiel STDKLAS.txt)</h3>
-            <ul>
-              <li><strong>Header</strong>: Die erste Zeile muss die Spaltenüberschriften enthalten: Klasse,
-                Klassenleitung (Reihenfolge beliebig, Groß-/Kleinschreibung wird ignoriert, Anführungsstriche optional).
-              </li>
-              <li><strong>Datenzeilen</strong>: Jede weitere Zeile repräsentiert eine Klassenleitungszuweisung mit den
-                Werten:
-                <ul>
-                  <li>Klasse: Name der Klasse (z. B. 5A, 10B).</li>
-                  <li>Klassenleitung: Name der Lehrkraft, die die Klassenleitung innehat (z. B. Mül).</li>
-                </ul>
-              </li>
-              <li><strong>Beispiel</strong>:
-                <pre>
-"Klasse","Klassenleitung"
-"5A","Mül"
-"6B","Sch"
-            </pre>
-              </li>
-            </ul>
-            <p><strong>Hinweis</strong>: Leere Werte oder ungültige Zeilen (z. B. fehlende Werte) führen zu Warnungen.
-              Die Dateien müssen mindestens eine gültige Datenzeile enthalten, um als erfolgreich geladen zu gelten.</p>
-          </div>
-        </details>
-        <details class="faq-item">
-          <summary>Können Unterricht und Klassen nachträglich ergänzt werden?</summary>
-          <div class="faq-content">Unterrichts- und Klassenleiterdaten werden lokal im Browser gespeichert und können
-            direkt im Konferenzplaner ergänzt oder
-            bearbeitet werden. Nach dem Hochladen der Dateien können Sie neue Zeilen
-            hinzufügen oder bestehende Einträge bearbeiten. Verwenden Sie die Schaltflächen „Zeile hinzufügen“ und
-            „Speichern“, um die Änderungen in den Daten zu speichern. Diese Änderungen werden dann bei der Planung
-            berücksichtigt.</div>
         </details>
         <details class="faq-item">
           <summary>Mit welcher Methode erfolgt die Berechnung?</summary>
@@ -123,7 +63,7 @@
                 Lehrer</li>
               <li>wenn die Klassenleiterpflicht aktiviert ist und der
                 Klassenleiter nicht verfügbar ist oder nicht in der Klasse unterrichtet</li>
-              <li>zu hohe Mindesanwesenheitsquote</li>
+              <li>zu hohe Mindestanwesenheitsquote</li>
               <li>zu wenig Zeitslots</li>
             </ul>
             Überprüfen Sie die Warnungen im Planungsergebnis, um die genauen Ursachen
@@ -148,25 +88,6 @@
             Option in den Planungsoptionen, und geben Sie für Klassen ohne Jahrgang (z. B. Kurse ohne führende Zahl)
             manuell einen Jahrgang ein. Der Planer berücksichtigt dann diese Beschränkung und verteilt Klassen
             unterschiedlicher Jahrgänge auf die Slots.</div>
-        </details>
-        <details class="faq-item">
-          <summary>Was sind bevorzugte Fächer?</summary>
-          <div class="faq-content">Bevorzugte Fächer sind Fächer, die bei der Planung priorisiert werden, um Lehrer mit
-            diesen Fächern bevorzugt einer Klasse zuzuweisen. Sie können in den Optionen aus der Liste der verfügbaren
-            Fächer auswählen, welche Fächer bevorzugt werden sollen. Der Planer versucht, Lehrer mit diesen Fächern in
-            die Konferenzen einzubeziehen, um die Relevanz der anwesenden Lehrer zu erhöhen. Dies ist besonders
-            nützlich, um sicherzustellen, dass Hauptfachlehrer anwesend sind.</div>
-        </details>
-        <details class="faq-item">
-          <summary>Was bedeutet „Klassenleiter in eigene Klasse verplanen“?</summary>
-          <div class="faq-content">Die Option „Klassenleiter in eigene Klasse verplanen“ (Klassenleiterpflicht) stellt
-            sicher, dass der Klassenleiter einer Klasse zwingend in der Konferenz dieser Klasse anwesend ist, sofern er
-            verfügbar ist. Wenn diese Option aktiviert ist und der Klassenleiter nicht anwesend ist oder nicht in der
-            Klasse unterrichtet, wird die Klasse nicht verplant, und es erscheint eine entsprechende Warnung. Diese
-            Einstellung ist nützlich, um sicherzustellen, dass Klassenleiter an den Konferenzen ihrer Klassen
-            teilnehmen. Wenn ein Klassenlehrer nicht verfügbar ist, sollte der Ersatz in die Tabelle der Klassenleiter
-            eingetragen
-            werden.</div>
         </details>
         <details class="faq-item">
           <summary>Wie wird die Mindestanwesenheitsquote berechnet?</summary>
@@ -198,74 +119,114 @@
             und „Lehrerplan exportieren“ im Planungstab heruntergeladen werden.</div>
         </details>
       </div>
-      <div class="tab-content" id="csvEdit">
-        <div class="tabs">
-          <button class="tab-button" data-tab="unterricht">Unterricht</button>
-          <button class="tab-button" data-tab="klassenleiter">Klassenleiter</button>
-        </div>
-        <h2>Daten</h2>
-        <div class="note">
-          <p>Beginnen Sie damit, die Unterrichts- und Klassenleiter-Daten zu importieren. Die Daten werden nur lokal im
-            Browser gespeichert.</p>
-        </div>
-        <div class="file-upload">
-          <label for="unterrichtInput">Unterricht importieren, z. B. STDPLAN.txt</label>
-          <input type="file" id="unterrichtInput" accept=".csv,.txt" />
-        </div>
-        <div class="file-upload">
-          <label for="klassenleiterInput">Klassenleiter importieren, z. B. STDKLAS.txt</label>
-          <input type="file" id="klassenleiterInput" accept=".csv,.txt" />
-          <div class="file-upload" style="margin-top: 20px;">
-            <button id="resetCSV" class="reset-btn">Gespeicherte Daten zurücksetzen</button>
-          </div>
-        </div>
-        <div id="csvMessage" class="message-box"></div>
-      </div>
+
       <div class="tab-content" id="unterricht">
-        <div class="tabs"><button class="tab-button" data-tab="csvEdit">zurück</button></div>
         <div class="file-upload hidden" id="csvTablesSection">
-          <h3>Unterricht</h3>
+          <h2>Unterricht & Klassenleiter</h2>
           <div class="note">
-            <p>Die Tabelle erscheint, sobald die Daten geladen sind. Bearbeiten Sie die Daten, fügen Sie neue Zeilen
-              hinzu oder löschen Sie bestehende Zeilen und speichern Sie die Änderungen.</p>
+            <p></p>Importieren Sie hier den gesamten Unterricht und die Klassenleiter.</p>
+            <p>Das Format entspricht z. B.
+              den Exportdateien STDPLAN.txt und STDKLAS.txt der ASV.</p>
+            <p>Die Dateien müssen mindestens eine gültige Datenzeile enthalten, um als erfolgreich geladen zu gelten.
+            </p>
+            <p>Unterrichts- und Klassenleiterdaten werden lokal im Browser gespeichert und können
+              direkt ergänzt oder bearbeitet werden.</p>
+          </div>
+          <div id="csvMessage" class="message-box"></div>
+          <br>
+          <details class="faq-item">
+            <summary>Anleitung: Klassenleiter importieren</summary>
+            <ul>
+              <li><strong>Header</strong>: Die erste Zeile muss die Spaltenüberschriften enthalten: Klasse,
+                Klassenleitung (Reihenfolge beliebig, Groß-/Kleinschreibung wird ignoriert, Anführungsstriche optional).
+              </li>
+              <li><strong>Datenzeilen</strong>: Jede weitere Zeile repräsentiert eine Klassenleitungszuweisung mit den
+                Werten:
+                <ul>
+                  <li>Klasse: Name der Klasse (z. B. 5A, 10B).</li>
+                  <li>Klassenleitung: Name der Lehrkraft, die die Klassenleitung innehat (z. B. Mül).</li>
+                </ul>
+              </li>
+              <li><strong>Beispiel</strong>:
+                <pre>
+"Klasse","Klassenleitung"
+"5A","Mül"
+"6B","Sch"
+            </pre>
+              </li>
+            </ul>
+          </details>
+          <div class="input-section">
+            <div id="upload-area">
+              <p>Datei hierher ziehen oder klicken zum Hochladen</p>
+              <input type="file" id="klassenleiterInput" accept=".csv,.txt" />
+              <span id="fileName">Keine Datei gewählt</span>
+            </div>
+          </div>
+          <div id="klassenleiterCSVTable"></div>
+          <button id="addKlassenleiterRow" class="add-row-btn">Neue Zeile hinzufügen</button>
+          <button id="saveKlassenleiterCSV" class="save-btn">Änderungen speichern</button>
+          <details class="faq-item">
+            <summary>Anleitung: Unterricht importieren</summary>
+            <ul>
+              <li><strong>Kopfzeile</strong>: Die erste Zeile muss die Spaltenüberschriften enthalten: Klasse, Fach,
+                Lehrkraft (Reihenfolge beliebig, Groß-/Kleinschreibung wird ignoriert, Anführungsstriche optional).</li>
+              <li><strong>Datenzeilen</strong>: Jede weitere Zeile repräsentiert eine Unterrichtseinheit mit den Werten:
+                <ul>
+                  <li>Klasse: Name der Klasse (z. B. 5A, 10B).</li>
+                  <li>Fach: Name des Fachs (z. B. M, D).</li>
+                  <li>Lehrkraft: Kürzel der Lehrkraft (z. B. Mül, Sch).</li>
+                </ul>
+              </li>
+              <li><strong>Beispiel</strong>:
+                <pre>
+"Klasse","Fach","Lehrkraft"
+"5A","M","Mül"
+"5A","D","Sch"
+"6B","E","Mei"
+            </pre>
+              </li>
+            </ul>
+          </details>
+
+          <div class="file-upload">
+            <div id="upload-area">
+              <p>Datei hierher ziehen oder klicken zum Hochladen</p>
+              <input type="file" id="unterrichtInput" accept=".csv,.txt" />
+              <span id="fileName">Keine Datei gewählt</span>
+            </div>
           </div>
           <div id="unterrichtCSVTable"></div>
           <button id="addUnterrichtRow" class="add-row-btn">Neue Zeile hinzufügen</button>
           <button id="saveUnterrichtCSV" class="save-btn">Änderungen speichern</button>
         </div>
-      </div>
-      <div class="tab-content" id="klassenleiter">
-        <div class="tabs"><button class="tab-button" data-tab="csvEdit">zurück</button></div>
-        <div id="klassenleiterCSVSection">
-          <h3>Klassenleiter</h3>
-          <div class="note">
-            <p>Die Tabelle erscheint, sobald die Daten geladen sind. Bearbeiten Sie die Daten, fügen Sie neue Zeilen
-              hinzu oder löschen Sie bestehende Zeilen und speichern Sie die Änderungen.</p>
-          </div>
-          <div id="klassenleiterCSVTable"></div>
-          <button id="addKlassenleiterRow" class="add-row-btn">Neue Zeile hinzufügen</button>
-          <button id="saveKlassenleiterCSV" class="save-btn">Änderungen speichern</button>
+
+        <div class="file-upload" style="margin-top: 20px;">
+          <button id="resetCSV" class="reset-btn">Gespeicherte Daten zurücksetzen</button>
         </div>
       </div>
+
+
       <div class="tab-content" id="einstellungen">
-        <h2>Klassen</h2>
+        <h2>Optionen</h2>
         <div class="note">
-          <p>Wählen Sie die Klassen aus, die für die Planung berücksichtigt werden sollen. Geben Sie für Klassen ohne
-            Jahrgangsstufe (z. B. Kurse) eine manuelle Jahrgangsstufe ein, wenn "Jahrgangsstufen aufteilen" aktiviert
-            ist.</p>
+          <ul>
+            <li>Wählen Sie die Klassen aus, die für die Planung berücksichtigt werden sollen. Geben Sie für Klassen ohne
+              Jahrgangsstufe (z. B. Kurse) eine manuelle Jahrgangsstufe ein, wenn "Jahrgangsstufen aufteilen" aktiviert
+              ist.</li>
+            <li>Wählen Sie die Lehrer aus, die an den Klassenkonferenzen teilnehmen sollen. Nur ausgewählte Lehrer
+              werden
+              in die Planung einbezogen.</li>
+            <li>Konfigurieren Sie die Planungsoptionen. Wählen Sie bevorzugte Fächer aus, um die Planung zu
+              priorisieren.
+            </li>
+          </ul>
         </div>
+        <h3>Klassen</h3>
         <div id="klassenContainer" class="checkbox-list"></div>
-        <h2>Lehrer</h2>
-        <div class="note">
-          <p>Wählen Sie die Lehrer aus, die an den Klassenkonferenzen teilnehmen sollen. Nur ausgewählte Lehrer werden
-            in die Planung einbezogen.</p>
-        </div>
+        <h3>Lehrer</h3>
         <div id="lehrerContainer" class="checkbox-list"></div>
-        <h2>Planungsoptionen</h2>
-        <div class="note">
-          <p>Konfigurieren Sie die Planungsoptionen. Wählen Sie bevorzugte Fächer aus, um die Planung zu priorisieren.
-          </p>
-        </div>
+        <h3>Planungsoptionen</h3>
         <div class="einstellungen">
           <label for="maxSlots">Maximale Anzahl der Zeitslots:</label>
           <input type="number" id="maxSlots" value="10" min="1" max="50" /><br /><br />
@@ -301,6 +262,14 @@
       </div>
     </div>
   </div>
+
+  <footer>
+<div><p><a href="https://oer.fdagner.de">Startseite</a> · <a href="https://github.com/fdagner/klassenkonferenzen_planen">Download & Repository</a> · <a
+          href="/impressum/">Impressum</a> · 
+          <a href="/datenschutz/">Datenschutz</a><br><br>
+      </p>
+  </div>
+</footer>
 
   <script>
     const slider = document.getElementById('maxVersucheSlider');
