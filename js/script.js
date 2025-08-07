@@ -9,6 +9,51 @@ const state = {
   anwesendeLehrer: new Set(),
   bevorzugteFaecher: new Set(),
 };
+// ZUERST: Funktion definieren
+function enableDragAndDrop(dropZoneId, inputId) {
+  const dropZone = document.getElementById(dropZoneId);
+  const fileInput = document.getElementById(inputId);
+
+  if (!dropZone || !fileInput) {
+    console.warn(`Element nicht gefunden: ${dropZoneId} oder ${inputId}`);
+    return;
+  }
+
+  ['dragenter', 'dragover'].forEach(event => {
+    dropZone.addEventListener(event, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.style.backgroundColor = '#e6f3ff';
+    });
+  });
+
+  ['dragleave', 'dragend', 'drop'].forEach(event => {
+    dropZone.addEventListener(event, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.style.backgroundColor = '#ffffff';
+    });
+  });
+
+  dropZone.addEventListener('drop', e => {
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      const event = new Event('change', { bubbles: true });
+      fileInput.dispatchEvent(event);
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('dropZoneKlassenleiter') && document.getElementById('klassenleiterInput')) {
+    enableDragAndDrop('dropZoneKlassenleiter', 'klassenleiterInput');
+  }
+
+  if (document.getElementById('dropZoneUnterricht') && document.getElementById('unterrichtInput')) {
+    enableDragAndDrop('dropZoneUnterricht', 'unterrichtInput');
+  }
+});
+
 
 function addStatusMessage(message, isError = false, isWarning = false) {
   const csvMessageDiv = document.getElementById('csvMessage');
@@ -180,6 +225,8 @@ function ladeAuswahl() {
   // Speichere die bereinigte Auswahl
   speichereAuswahl();
 }
+
+
 
 // Datenmanagement
 async function ladeGespeicherteCSV(changedFile = null) {
@@ -1269,6 +1316,7 @@ function updateFaecherUI() {
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('DOMContentLoaded ausgelöst');
 
+  
   const details = document.querySelectorAll('.faq-item');
 
   details.forEach((detail) => {
@@ -1603,3 +1651,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error("Element mit ID 'exportLehrerBtn' wurde nicht gefunden.");
   }
 });
+

@@ -156,16 +156,15 @@
               </li>
             </ul>
           </details>
-          <div class="input-section">
-            <div id="upload-area">
-              <p>Datei hierher ziehen oder klicken zum Hochladen</p>
-              <input type="file" id="klassenleiterInput" accept=".csv,.txt" />
-              <span id="fileName">Keine Datei gewählt</span>
-            </div>
-          </div>
-          <div id="klassenleiterCSVTable"></div>
-          <button id="addKlassenleiterRow" class="add-row-btn">Neue Zeile hinzufügen</button>
-          <button id="saveKlassenleiterCSV" class="save-btn">Änderungen speichern</button>
+
+  <label for="klassenleiterInput" class="input-section" id="dropZoneKlassenleiter">
+  <p>Datei hierher ziehen oder klicken zum Hochladen</p>
+</label>
+<input type="file" id="klassenleiterInput" accept=".csv,.txt" style="display: none;" />
+
+<div id="klassenleiterCSVTable"></div>
+<button id="addKlassenleiterRow" class="add-row-btn">Neue Zeile hinzufügen</button>
+<button id="saveKlassenleiterCSV" class="save-btn">Änderungen speichern</button>
           <details class="faq-item">
             <summary>Anleitung: Unterricht importieren</summary>
             <ul>
@@ -189,13 +188,13 @@
             </ul>
           </details>
 
-          <div class="file-upload">
-            <div id="upload-area">
-              <p>Datei hierher ziehen oder klicken zum Hochladen</p>
-              <input type="file" id="unterrichtInput" accept=".csv,.txt" />
-              <span id="fileName">Keine Datei gewählt</span>
-            </div>
-          </div>
+ 
+<label for="unterrichtInput" class="input-section" id="dropZoneUnterricht">
+  <p>Datei hierher ziehen oder klicken zum Hochladen</p>
+</label>
+<input type="file" id="unterrichtInput" accept=".csv,.txt" style="display: none;" />
+
+
           <div id="unterrichtCSVTable"></div>
           <button id="addUnterrichtRow" class="add-row-btn">Neue Zeile hinzufügen</button>
           <button id="saveUnterrichtCSV" class="save-btn">Änderungen speichern</button>
