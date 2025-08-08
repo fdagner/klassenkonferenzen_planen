@@ -33,18 +33,14 @@ h1 {
     margin-bottom: 2mm;
 }
 
-.file-upload {
-    margin-bottom: 20px;
-}
-
-.file-upload label {
+label {
     font-weight: bold;
     display: block;
     margin-bottom: 8px;
     color: #2c3e50;
 }
 
-.file-upload input[type="file"] {
+input[type="file"] {
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -55,36 +51,30 @@ h1 {
 
 .input-section,
 .output-section {
-  background-color: #ffffff;
+  border: 2px dashed #96d4fd;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   padding: 20px;
-  margin-bottom: 30px;
+  text-align: center;
+  background-color: #ffffff;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  position: relative;
+  width: 75%;
 }
 
 label {
-  display: inline-block;
-  margin-top: 10px;
-  font-weight: 600;
-  margin-right: 10px;
+    display: inline-block;
+    margin-top: 10px;
+    font-weight: 600;
+    margin-right: 10px;
 }
 
-input[type="text"],
-input[type="number"] {
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 14px;
-  margin-right: 10px;
-  margin-top: 5px;
-  background-color: #fff;
-  transition: border-color 0.3s ease;
-}
 
 input:focus {
-  border-color: #007bff;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
 }
 
 #optionen {
@@ -102,33 +92,6 @@ input:focus {
     padding: 20px;
 }
 
-#upload-area {
-  border: 2px dashed #96d4fd;
-  border-radius: 8px;
-  padding: 20px;
-  text-align: center;
-  background-color: #ffffff;
-  color: #333;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  position: relative;
-  width: 75%;
-  margin: 0 auto;
-}
-
-#upload-area:hover {
-  background-color: #e0f0ff;
-}
-
-#upload-area input[type="file"] {
-  opacity: 0;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  left: 0;
-  top: 0;
-  cursor: pointer;
-}
 
 
 .tabs {
@@ -234,21 +197,29 @@ details[open] summary {
 }
 
 .image-effect {
-    max-width: 50%; /* Bild passt sich der Containergröße an */
+    max-width: 50%;
+    /* Bild passt sich der Containergröße an */
     height: auto;
     display: block;
-    border-radius: 10px; /* Abgerundete Ecken */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Leichter Schatten */
-    transition: all 0.3s ease-in-out; /* Sanfte Animation */
-    margin: 0 auto; /* Zentriert das Bild horizontal */
+    border-radius: 10px;
+    /* Abgerundete Ecken */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Leichter Schatten */
+    transition: all 0.3s ease-in-out;
+    /* Sanfte Animation */
+    margin: 0 auto;
+    /* Zentriert das Bild horizontal */
     margin-bottom: 20px;
 }
 
 /* Hover-Effekt */
 .image-effect:hover {
-    transform: scale(1.05); /* Leichte Vergrößerung */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Stärkerer Schatten */
-    filter: brightness(1.1); /* Bild wird etwas heller */
+    transform: scale(1.05);
+    /* Leichte Vergrößerung */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    /* Stärkerer Schatten */
+    filter: brightness(1.1);
+    /* Bild wird etwas heller */
 }
 
 /* Größere Checkboxes für Klassen, Lehrer und Fächer */
@@ -645,7 +616,9 @@ em {
     line-height: 1.6;
 }
 
-.faq-content p, .faq-content ul, .faq-content pre {
+.faq-content p,
+.faq-content ul,
+.faq-content pre {
     margin: 0.5em 0;
 }
 
@@ -778,3 +751,4 @@ em {
         box-shadow: none;
     }
 }
+
