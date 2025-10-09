@@ -9,6 +9,50 @@ const state = {
   anwesendeLehrer: new Set(),
   bevorzugteFaecher: new Set(),
 };
+// ZUERST: Funktion definieren
+function enableDragAndDrop(dropZoneId, inputId) {
+  const dropZone = document.getElementById(dropZoneId);
+  const fileInput = document.getElementById(inputId);
+
+  if (!dropZone || !fileInput) {
+    console.warn(`Element nicht gefunden: ${dropZoneId} oder ${inputId}`);
+    return;
+  }
+
+  ['dragenter', 'dragover'].forEach(event => {
+    dropZone.addEventListener(event, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.style.backgroundColor = '#e6f3ff';
+    });
+  });
+
+  ['dragleave', 'dragend', 'drop'].forEach(event => {
+    dropZone.addEventListener(event, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.style.backgroundColor = '#ffffff';
+    });
+  });
+
+  dropZone.addEventListener('drop', e => {
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      const event = new Event('change', { bubbles: true });
+      fileInput.dispatchEvent(event);
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('dropZoneKlassenleiter') && document.getElementById('klassenleiterInput')) {
+    enableDragAndDrop('dropZoneKlassenleiter', 'klassenleiterInput');
+  }
+
+  if (document.getElementById('dropZoneUnterricht') && document.getElementById('unterrichtInput')) {
+    enableDragAndDrop('dropZoneUnterricht', 'unterrichtInput');
+  }
+});
 
 
 function addStatusMessage(message, isError = false, isWarning = false) {
@@ -80,22 +124,12 @@ const createTableHTML = (headers, bodyId) => `
 
 // Neue Funktion zum Speichern des Plans
 function speicherePlan() {
-  console.log('speicherePlan: Speichere aktuellen Plan...');
   if (state.aktuellerPlan) {
-    try {
-      const planDaten = {
-        aktuellerPlan: state.aktuellerPlan, // Speichere das komplette Ergebnis-Objekt
-        anwesendeLehrer: Array.from(state.anwesendeLehrer),
-        bevorzugteFaecher: Array.from(state.bevorzugteFaecher),
-      };
-      console.log('speicherePlan: Zu speichernde Daten:', planDaten);
-      localStorage.setItem('planDaten', JSON.stringify(planDaten));
-      console.log('speicherePlan: Plan erfolgreich in localStorage gespeichert.');
-    } catch (e) {
-      console.error('speicherePlan: Fehler beim Speichern des Plans:', e);
-    }
-  } else {
-    console.warn('speicherePlan: Kein aktueller Plan vorhanden.');
+    localStorage.setItem('planDaten', JSON.stringify({
+      aktuellerPlan: state.aktuellerPlan,
+      anwesendeLehrer: Array.from(state.anwesendeLehrer),
+      bevorzugteFaecher: Array.from(state.bevorzugteFaecher)
+    }));
   }
 }
 
@@ -1053,6 +1087,7 @@ function zeigeErgebnis(ergebnis) {
 }
 
 
+
 function addSlotChangeListeners(plan, ergebnis) {
   document.querySelectorAll('.slot-changer').forEach(select => {
     select.addEventListener('change', function () {
@@ -1102,17 +1137,12 @@ function addSlotChangeListeners(plan, ergebnis) {
 
       currentSlotData.splice(currentSlotData.indexOf(klasseEntry), 1);
       plan[newSlot].push(klasseEntry);
-
-      // WICHTIG: Aktualisiere auch das ergebnis-Objekt
-      ergebnis.plan = plan;
-      state.aktuellerPlan = ergebnis;
-
+      state.aktuellerPlan.plan = plan;
       speicherePlan(); // Speichere Plan und anwesende Lehrer
       zeigeErgebnis(ergebnis);
     });
   });
 }
-
 
 function addTeacherMoveListeners(plan, ergebnis) {
   const anwesendQuote = parseFloat(document.getElementById('anwesendQuote')?.value) || 0;
@@ -1141,10 +1171,6 @@ function addTeacherMoveListeners(plan, ergebnis) {
       const istDoppelt = lehrerInAnderenKlassen.has(lehrer);
 
       targetKlasse.lehrer.push(lehrer);
-
-      // WICHTIG: Aktualisiere auch das ergebnis-Objekt
-      ergebnis.plan = plan;
-      state.aktuellerPlan = ergebnis;
 
       speicherePlan(); // Speichere Plan und anwesende Lehrer
       zeigeErgebnis(ergebnis);
@@ -1183,16 +1209,12 @@ function addTeacherMoveListeners(plan, ergebnis) {
       }
 
       targetKlasse.lehrer.splice(targetKlasse.lehrer.indexOf(lehrer), 1);
-
-      // WICHTIG: Aktualisiere auch das ergebnis-Objekt
-      ergebnis.plan = plan;
-      state.aktuellerPlan = ergebnis;
-
       speicherePlan(); // Speichere Plan und anwesende Lehrer
       zeigeErgebnis(ergebnis);
     });
   });
 }
+
 // Export-Funktionen
 function exportKlassenplan() {
   if (!state.aktuellerPlan) {
@@ -1294,6 +1316,7 @@ function updateFaecherUI() {
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('DOMContentLoaded ausgelöst');
 
+  
   const details = document.querySelectorAll('.faq-item');
 
   details.forEach((detail) => {
@@ -1391,8 +1414,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   console.log('Event-Listener für Tab-Buttons hinzugefügt');
-
-
 
   const unterrichtInput = document.getElementById('unterrichtInput');
   if (unterrichtInput) {
