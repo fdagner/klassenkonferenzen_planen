@@ -51,16 +51,16 @@ input[type="file"] {
 
 .input-section,
 .output-section {
-  border: 2px dashed #96d4fd;
-  border-radius: 8px;
-  padding: 20px;
-  text-align: center;
-  background-color: #ffffff;
-  color: #333;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  position: relative;
-  width: 75%;
+    border: 2px dashed #96d4fd;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    background-color: #ffffff;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    position: relative;
+    width: 75%;
 }
 
 label {
@@ -514,6 +514,10 @@ em {
     margin: 0 auto 10px;
 }
 
+.raum-hinweis {
+    color: red;
+}
+
 @keyframes spin {
     0% {
         transform: rotate(0deg);
@@ -751,4 +755,3 @@ em {
         box-shadow: none;
     }
 }
-

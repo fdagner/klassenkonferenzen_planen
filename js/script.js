@@ -8,6 +8,7 @@ const state = {
   aktuellerPlan: null,
   anwesendeLehrer: new Set(),
   bevorzugteFaecher: new Set(),
+  raeume: [], // Neues Array für Räume
 };
 // ZUERST: Funktion definieren
 function enableDragAndDrop(dropZoneId, inputId) {
@@ -117,18 +118,19 @@ const saveToLocalStorage = (key, value) => localStorage.setItem(key, value);
 const getFromLocalStorage = (key) => localStorage.getItem(key) || '';
 const createTableHTML = (headers, bodyId) => `
   <table class="csv-table">
-    <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+    <thead><tr>${headers.map(h => `<th class="sortable">${h}</th>`).join('')}</tr></thead>
     <tbody id="${bodyId}"></tbody>
   </table>
 `;
 
-// Neue Funktion zum Speichern des Plans
+// Neue Funktion zum Speichern des Plans (inkl. Räume)
 function speicherePlan() {
   if (state.aktuellerPlan) {
     localStorage.setItem('planDaten', JSON.stringify({
       aktuellerPlan: state.aktuellerPlan,
       anwesendeLehrer: Array.from(state.anwesendeLehrer),
-      bevorzugteFaecher: Array.from(state.bevorzugteFaecher)
+      bevorzugteFaecher: Array.from(state.bevorzugteFaecher),
+      raeume: state.raeume
     }));
   }
 }
@@ -239,10 +241,16 @@ async function ladeGespeicherteCSV(changedFile = null) {
   state.anwesendeLehrer = new Set(); // Initial leeren
   state.bevorzugteFaecher = new Set(); // Initial leeren
 
-  // Verarbeitung der Unterrichts-CSV (unverändert)
+  // Verarbeitung der Unterrichts-CSV (mit Leeren der Sets vor dem Parsen)
   const unterrichtCSV = getFromLocalStorage('unterrichtCSV');
   let unterrichtError = false;
   if (unterrichtCSV) {
+    // WICHTIG: Leere alle lehrerSets und lehrerFaecher, bevor neu geparst wird
+    Object.values(state.klassenMap).forEach(kl => {
+      kl.lehrerSet.clear();
+      kl.lehrerFaecher.clear();
+    });
+
     const lines = unterrichtCSV.split('\n').filter(line => line.trim());
 
     if (lines.length < 2) {
@@ -257,6 +265,7 @@ async function ladeGespeicherteCSV(changedFile = null) {
       const klasseIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'klasse');
       const fachIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'fach');
       const lehrkraftIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'lehrkraft');
+      const fachgruppeIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'fachgruppe');
 
       // Überprüfe, ob alle benötigten Spalten gefunden wurden
       if (klasseIndex === -1 || fachIndex === -1 || lehrkraftIndex === -1) {
@@ -265,7 +274,7 @@ async function ladeGespeicherteCSV(changedFile = null) {
           if (klasseIndex === -1) missingColumns.push('Klasse');
           if (fachIndex === -1) missingColumns.push('Fach');
           if (lehrkraftIndex === -1) missingColumns.push('Lehrkraft');
-          addStatusMessage(`Fehler beim Laden der Unterrichts-Datei: Spalte(n) ${missingColumns.join(', ')} nicht gefunden.`, true);
+          addStatusMessage(`Fehler beim Laden der Unterrichts-Datei: Spalten ${missingColumns.join(', ')} nicht gefunden.`, true);
         }
         state.unterrichtLoaded = false;
         unterrichtError = true;
@@ -279,6 +288,7 @@ async function ladeGespeicherteCSV(changedFile = null) {
           const klasse = columns[klasseIndex] ? columns[klasseIndex].replace(/"/g, '').trim() : '';
           const fach = columns[fachIndex] ? columns[fachIndex].replace(/"/g, '').trim() : '';
           const lehrkraft = columns[lehrkraftIndex] ? columns[lehrkraftIndex].replace(/"/g, '').trim() : '';
+          const fachgruppe = fachgruppeIndex !== -1 ? (columns[fachgruppeIndex] ? columns[fachgruppeIndex].replace(/"/g, '').trim() : '') : '';
 
           if (!klasse || !fach || !lehrkraft) {
             if (changedFile === 'unterricht') {
@@ -326,10 +336,14 @@ async function ladeGespeicherteCSV(changedFile = null) {
     }
   }
 
-  // Verarbeitung der Klassenleiter-CSV (mit Änderung für warning)
-  // Verarbeitung der Klassenleiter-CSV
+  // Verarbeitung der Klassenleiter-CSV (mit Leeren der kl-Werte vor dem Parsen)
   const klassenleiterCSV = getFromLocalStorage('klassenleiterCSV');
   if (klassenleiterCSV) {
+    // WICHTIG: Leere alle kl-Werte, bevor neu geparst wird
+    Object.values(state.klassenMap).forEach(kl => {
+      kl.kl = null;
+    });
+
     const lines = klassenleiterCSV.split('\n').filter(line => line.trim());
 
     if (lines.length < 2) {
@@ -349,7 +363,7 @@ async function ladeGespeicherteCSV(changedFile = null) {
           const missingColumns = [];
           if (klasseIndex === -1) missingColumns.push('Klasse');
           if (klassenleitungIndex === -1) missingColumns.push('Klassenleitung');
-          addStatusMessage(`Fehler beim Laden der Klassenleiter-Datei: Spalte(n) ${missingColumns.join(', ')} nicht gefunden.`, true);
+          addStatusMessage(`Fehler beim Laden der Klassenleiter-Datei: Spalten ${missingColumns.join(', ')} nicht gefunden.`, true);
         }
         state.klassenleiterLoaded = false;
       } else {
@@ -417,7 +431,7 @@ async function ladeGespeicherteCSV(changedFile = null) {
     }
   }
 
-  // Rest der Funktion bleibt unverändert
+
   // Bereinige state.klassenMap: Entferne Klassen, die nicht mehr in den CSV-Dateien existieren
   Object.keys(state.klassenMap).forEach(klasse => {
     if (!neueKlassen.has(klasse)) {
@@ -433,7 +447,7 @@ async function ladeGespeicherteCSV(changedFile = null) {
   state.faecherSet.clear();
   neueFaecher.forEach(fach => state.faecherSet.add(fach));
 
-  // Lade gespeicherte Plan-Daten
+  // Lade gespeicherte Plan-Daten (inkl. Räume)
   const gespeichertePlanDaten = getFromLocalStorage('planDaten');
   if (gespeichertePlanDaten) {
     try {
@@ -441,6 +455,7 @@ async function ladeGespeicherteCSV(changedFile = null) {
       state.aktuellerPlan = planDaten.aktuellerPlan;
       state.anwesendeLehrer = new Set(planDaten.anwesendeLehrer || []);
       state.bevorzugteFaecher = new Set(planDaten.bevorzugteFaecher || []);
+      state.raeume = planDaten.raeume || [];
     } catch (e) {
       console.error('Fehler beim Parsen der gespeicherten Plan-Daten:', e);
       localStorage.removeItem('planDaten'); // Entferne ungültige Daten
@@ -456,35 +471,6 @@ async function ladeGespeicherteCSV(changedFile = null) {
 
   updateUI();
   ladeAuswahl(); // Aktualisiere die Auswahl nach dem Laden der CSV-Daten
-}
-
-function deleteRow(rowId, table) {
-  const storageKey = table === 'unterricht' ? 'unterrichtCSV' : 'klassenleiterCSV';
-  const csv = getFromLocalStorage(storageKey);
-  if (!csv) {
-    alert('Keine Daten zum Löschen vorhanden.');
-    return;
-  }
-
-  // Splitte die CSV in Zeilen
-  const lines = csv.split('\n').filter(line => line.trim());
-  if (rowId < 0 || rowId >= lines.length) {
-    alert('Ungültige Zeile ausgewählt.');
-    return;
-  }
-
-  // Entferne die Zeile mit dem gegebenen Index
-  lines.splice(rowId + 1, 1); // +1, da der Header (erste Zeile) nicht gelöscht werden soll
-  saveToLocalStorage(storageKey, lines.join('\n'));
-
-  // Aktualisiere den Zustand und die UI
-  ladeGespeicherteCSV().then(() => {
-    zeigeCSVBearbeitung().then(() => {
-      updateUI();
-      ladeAuswahl(); // Bereinige die gespeicherten Auswahldaten
-      alert(`Zeile ${rowId + 1} aus ${table === 'unterricht' ? 'Unterrichts-CSV' : 'Klassenleiter-CSV'} gelöscht.`);
-    });
-  });
 }
 
 // UI-Handling
@@ -509,8 +495,6 @@ async function zeigeCSVBearbeitung() {
     }
 
     if (unterrichtCSV && state.unterrichtLoaded) {
-      unterrichtTable.innerHTML = createTableHTML(['Klasse', 'Fach', 'Lehrkraft', 'Aktion'], 'unterrichtCSVBody');
-      const unterrichtBody = document.getElementById('unterrichtCSVBody');
       const unterrichtLines = unterrichtCSV.split('\n').filter(line => line.trim());
 
       if (unterrichtLines.length < 2) return;
@@ -520,11 +504,23 @@ async function zeigeCSVBearbeitung() {
       const klasseIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'klasse');
       const fachIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'fach');
       const lehrkraftIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'lehrkraft');
+      const fachgruppeIndex = headerColumns.findIndex(col => col.replace(/"/g, '').trim().toLowerCase() === 'fachgruppe');
 
       if (klasseIndex === -1 || fachIndex === -1 || lehrkraftIndex === -1) {
         unterrichtTable.innerHTML = '<p class="no-data-hint">Fehler: Benötigte Spalten (Klasse, Fach, Lehrkraft) nicht gefunden.</p>';
         return;
       }
+
+      // Bestimme Header basierend auf vorhandener Fachgruppe-Spalte
+      const headers = ['Klasse', 'Fach', 'Lehrkraft'];
+      let hasFachgruppe = false;
+      if (fachgruppeIndex !== -1) {
+        headers.splice(1, 0, 'Fachgruppe'); // Füge nach Klasse ein
+        hasFachgruppe = true;
+      }
+      headers.push('Aktion');
+      unterrichtTable.innerHTML = createTableHTML(headers, 'unterrichtCSVBody');
+      const unterrichtBody = document.getElementById('unterrichtCSVBody');
 
       // Verarbeite die Daten und zeige sie in vereinfachter Form
       const processedData = [];
@@ -535,18 +531,25 @@ async function zeigeCSVBearbeitung() {
         const klasse = columns[klasseIndex] ? columns[klasseIndex].replace(/"/g, '').trim() : '';
         const fach = columns[fachIndex] ? columns[fachIndex].replace(/"/g, '').trim() : '';
         const lehrkraft = columns[lehrkraftIndex] ? columns[lehrkraftIndex].replace(/"/g, '').trim() : '';
+        const fachgruppe = fachgruppeIndex !== -1 ? (columns[fachgruppeIndex] ? columns[fachgruppeIndex].replace(/"/g, '').trim() : '') : '';
 
         if (klasse && fach && lehrkraft) {
-          processedData.push({ klasse, fach, lehrkraft, originalIndex: i });
+          processedData.push({ klasse, fachgruppe, fach, lehrkraft, originalIndex: i });
         }
       }
 
+      // Sortiere processedData zunächst nach originalIndex für Konsistenz
+      processedData.sort((a, b) => a.originalIndex - b.originalIndex);
+
       unterrichtBody.innerHTML = processedData.map((data, index) => {
+        const rowFields = ['klasse'];
+        if (hasFachgruppe) {
+          rowFields.push('fachgruppe');
+        }
+        rowFields.push('fach', 'lehrkraft');
         return `
     <tr data-row-id="${data.originalIndex}">
-      <td><input type="text" value="${data.klasse}" data-row="${data.originalIndex}" data-field="klasse" placeholder="Klasse"></td>
-      <td><input type="text" value="${data.fach}" data-row="${data.originalIndex}" data-field="fach" placeholder="Fach"></td>
-      <td><input type="text" value="${data.lehrkraft}" data-row="${data.originalIndex}" data-field="lehrkraft" placeholder="Lehrkraft"></td>
+      ${rowFields.map(field => `<td><input type="text" value="${data[field] || ''}" data-row="${data.originalIndex}" data-field="${field}" placeholder="${field.charAt(0).toUpperCase() + field.slice(1)}"></td>`).join('')}
       <td><button class="delete-row-btn" data-row="${data.originalIndex}" data-table="unterricht">Löschen</button></td>
     </tr>
   `;
@@ -555,6 +558,14 @@ async function zeigeCSVBearbeitung() {
       // Buttons sichtbar machen
       if (addUnterrichtRow) addUnterrichtRow.style.display = 'inline-block';
       if (saveUnterrichtCSV) saveUnterrichtCSV.style.display = 'inline-block';
+
+      // Sortier-Listener für Unterrichtstabelle hinzufügen
+      const sortableFields = ['klasse'];
+      if (hasFachgruppe) {
+        sortableFields.push('fachgruppe');
+      }
+      sortableFields.push('fach', 'lehrkraft');
+      addSortListeners('unterrichtCSVBody', sortableFields);
     } else {
       unterrichtTable.innerHTML = '<p class="no-data-hint">Bitte laden Sie die Unterrichts-Daten hoch, um die Daten anzuzeigen.</p>';
       // Buttons ausblenden
@@ -605,6 +616,9 @@ async function zeigeCSVBearbeitung() {
         }
       }
 
+      // Sortiere processedKlassenleiterData zunächst nach originalIndex für Konsistenz
+      processedKlassenleiterData.sort((a, b) => a.originalIndex - b.originalIndex);
+
       klassenleiterBody.innerHTML = processedKlassenleiterData.map((data, index) => {
         return `
     <tr data-row-id="${data.originalIndex}">
@@ -618,6 +632,9 @@ async function zeigeCSVBearbeitung() {
       // Buttons sichtbar machen
       if (addKlassenleiterRow) addKlassenleiterRow.style.display = 'inline-block';
       if (saveKlassenleiterCSV) saveKlassenleiterCSV.style.display = 'inline-block';
+
+      // Sortier-Listener für Klassenleiter-Tabelle hinzufügen
+      addSortListeners('klassenleiterCSVBody', ['klasse', 'klassenleitung']);
     } else {
       klassenleiterTable.innerHTML = '<p class="no-data-hint">Bitte laden Sie die Klassenleiter-Daten hoch, um die Daten anzuzeigen.</p>';
       // Buttons ausblenden
@@ -631,6 +648,50 @@ async function zeigeCSVBearbeitung() {
 
   // Event-Listener für Lösch-Buttons
   addDeleteRowListeners();
+}
+
+// Neue Funktion für Sortier-Listener
+function addSortListeners(bodyId, sortableFields) {
+  const table = document.querySelector(`#${bodyId}`).closest('table');
+  const headers = table.querySelectorAll('th.sortable');
+  let sortDirections = {}; // Speichert die Sortierrichtung pro Feld
+
+  headers.forEach((header, index) => {
+    if (index < sortableFields.length) { // Nur für sortierbare Felder
+      const field = sortableFields[index];
+      header.style.cursor = 'pointer';
+      header.addEventListener('click', () => {
+        const tbody = document.getElementById(bodyId);
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        // Toggle Sortierrichtung
+        sortDirections[field] = sortDirections[field] === 'asc' ? 'desc' : 'asc';
+        const direction = sortDirections[field];
+
+        // Sortiere Zeilen
+        rows.sort((a, b) => {
+          const aValue = a.querySelector(`input[data-field="${field}"]`)?.value.toLowerCase() || '';
+          const bValue = b.querySelector(`input[data-field="${field}"]`)?.value.toLowerCase() || '';
+          if (direction === 'asc') {
+            return aValue.localeCompare(bValue);
+          } else {
+            return bValue.localeCompare(aValue);
+          }
+        });
+
+        // Leere tbody und füge sortierte Zeilen hinzu
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+
+        // Aktualisiere Event-Listener für neue Lösch-Buttons
+        addDeleteRowListeners();
+
+        // Visuelle Indikatoren (optional: Pfeile hinzufügen)
+        headers.forEach(h => h.innerHTML = h.innerHTML.replace(/ [↑↓]/, '')); // Entferne alte Pfeile
+        header.innerHTML += direction === 'asc' ? ' ↑' : ' ↓';
+      });
+    }
+  });
 }
 
 function updateUI() {
@@ -683,6 +744,7 @@ function updateUI() {
 
     ladePlanungsoptionen();
     updateFaecherUI();
+    updateRaeumeUI(); // Neue Funktion für Räume
     const exportBtn = document.getElementById('exportBtn');
     if (exportBtn) exportBtn.style.display = state.aktuellerPlan ? 'block' : 'none';
     const exportLehrerBtn = document.getElementById('exportLehrerBtn');
@@ -691,6 +753,33 @@ function updateUI() {
     zeigeCSVBearbeitung();
   } else {
     console.error("Element mit ID 'optionen' wurde nicht gefunden.");
+  }
+}
+
+// Neue Funktion: Räume-UI aktualisieren
+function updateRaeumeUI() {
+  const maxKlassenProSlot = parseInt(document.getElementById('maxKlassenProSlot')?.value) || 5;
+  const raeumeInputs = document.getElementById('raeumeInputs');
+  if (raeumeInputs) {
+    // FIX: Kürze state.raeume auf die neue Länge und initialisiere leere Einträge
+    state.raeume.length = maxKlassenProSlot; // Kürzt oder erweitert das Array
+    for (let i = 0; i < maxKlassenProSlot; i++) {
+      if (state.raeume[i] === undefined) state.raeume[i] = ''; // Neu: Stelle sicher, dass es leer ist
+    }
+    
+    raeumeInputs.innerHTML = '';
+    for (let i = 0; i < maxKlassenProSlot; i++) {
+      const raumInput = document.createElement('input');
+      raumInput.type = 'text';
+      raumInput.placeholder = `Raum ${i + 1}`;
+      raumInput.value = state.raeume[i] || '';
+      raumInput.addEventListener('input', () => {
+        state.raeume[i] = raumInput.value;
+        speicherePlanungsoptionen();
+      });
+      raeumeInputs.appendChild(raumInput);
+      if (i < maxKlassenProSlot - 1) raeumeInputs.appendChild(document.createTextNode(' '));
+    }
   }
 }
 
@@ -801,8 +890,17 @@ function saveCSV(tableBodyId, storageKey, fields, alertMessage) {
 
   console.log(`saveCSV: Generierte CSV-Zeilen:`, csvLines);
 
-  // Erstelle die finale CSV-Datei
-  const header = storageKey === 'unterrichtCSV' ? '"Klasse","Fach","Lehrkraft"' : '"Klasse","Klassenleitung"';
+  // Erstelle die finale CSV-Datei mit dynamischem Header für Unterricht
+  let header;
+  if (storageKey === 'unterrichtCSV') {
+    if (fields.includes('fachgruppe')) {
+      header = '"Klasse","Fachgruppe","Fach","Lehrkraft"';
+    } else {
+      header = '"Klasse","Fach","Lehrkraft"';
+    }
+  } else {
+    header = '"Klasse","Klassenleitung"';
+  }
   const finalCSV = csvLines.length > 0 ? [header, ...csvLines].join('\n') : header;
   console.log(`saveCSV: Finale CSV:`, finalCSV);
 
@@ -854,7 +952,7 @@ function setHasAny(setA, setB) {
   return false;
 }
 
-
+// Modifizierte Planungsfunktion mit Raumzuweisung
 function versuchePlanung(maxSlots, maxKlassenProSlot, anwesendQuote, klassenleiterPflicht, einerProJahrgang, selectedKlassen) {
   const belegung = Array(maxSlots).fill().map(() => new Set());
   const plan = Array(maxSlots).fill().map(() => []);
@@ -923,17 +1021,28 @@ function versuchePlanung(maxSlots, maxKlassenProSlot, anwesendQuote, klassenleit
       }
 
       // Entferne den Klassenleiter aus der Liste der restlichen Lehrer, um Dopplung zu vermeiden
-      const restlicheLehrer = verfügbare.filter(l => l !== klassenleiter).sort((a, b) => {
-        const faecherA = klasse.lehrerFaecher.get(a) || new Set();
-        const faecherB = klasse.lehrerFaecher.get(b) || new Set();
-        const hatBevorzugtesFachA = setHasAny(faecherA, state.bevorzugteFaecher);
-        const hatBevorzugtesFachB = setHasAny(faecherB, state.bevorzugteFaecher);
-        return hatBevorzugtesFachA && !hatBevorzugtesFachB ? -1 : hatBevorzugtesFachB && !hatBevorzugtesFachA ? 1 : Math.random() - 0.5;
-      });
+const restlicheLehrer = verfügbare.filter(l => l !== klassenleiter).sort((a, b) => {
+  const faecherA = klasse.lehrerFaecher.get(a) || new Set();
+  const faecherB = klasse.lehrerFaecher.get(b) || new Set();
+  
+  // Prüfe ob mindestens EIN bevorzugtes Fach unterrichtet wird
+  const hatBevorzugtesFachA = setHasAny(faecherA, state.bevorzugteFaecher);
+  const hatBevorzugtesFachB = setHasAny(faecherB, state.bevorzugteFaecher);
+  
+  // Lehrer mit bevorzugten Fächern zuerst
+  if (hatBevorzugtesFachA && !hatBevorzugtesFachB) return -1;
+  if (!hatBevorzugtesFachA && hatBevorzugtesFachB) return 1;
+  
+  // Bei Gleichstand: Zufällig
+  return Math.random() - 0.5;
+});
 
       const benötigteLehrer = mindAnwesend - (klassenleiterPflicht && klassenleiter && verfügbare.includes(klassenleiter) ? 1 : 0);
       auszuwählen = auszuwählen.concat(restlicheLehrer.slice(0, benötigteLehrer));
-      plan[slot].push({ klasse: klasse.name, jahrgang, lehrer: auszuwählen, klassenleiter });
+      // Raumzuweisung: Nimm den nächsten verfügbaren Raum im Slot (zyklisch, aber einzigartig)
+      const raumIndex = plan[slot].length % state.raeume.length;
+      const raum = state.raeume[raumIndex] || `Raum ${raumIndex + 1}`;
+      plan[slot].push({ klasse: klasse.name, jahrgang, lehrer: auszuwählen, klassenleiter, raum });
       auszuwählen.forEach(l => besetzt.add(l));
       zuweisungen.set(klasse.name, auszuwählen);
       slotGefunden = true;
@@ -987,9 +1096,22 @@ function zeigeErgebnis(ergebnis) {
   const quoteWarnungen = [];
   const klassenleiterWarnungen = [];
   const doppelteLehrer = new Map();
+  const raumDuplikate = new Map(); // Neu: Map für Raum-Duplikate pro Slot
 
   let konferenzAnzahl = 0, summeQuote = 0, maxQuote = -Infinity, minQuote = Infinity;
   let maxQuoteKlasse = '', minQuoteKlasse = '';
+
+  // Überprüfe Raum-Duplikate pro Slot
+  plan.forEach((slotDaten, slotIndex) => {
+    const raumVerwendung = new Map();
+    slotDaten.forEach(e => {
+      const raum = e.raum || '';
+      if (raum) {
+        raumVerwendung.set(raum, (raumVerwendung.get(raum) || 0) + 1);
+      }
+    });
+    raumDuplikate.set(slotIndex, raumVerwendung);
+  });
 
   plan.forEach((slotDaten, slotIndex) => {
     const lehrerCount = new Map();
@@ -1044,8 +1166,15 @@ function zeigeErgebnis(ergebnis) {
       : `<div class="info"><strong>Erfolg:</strong><p>Keine Warnungen! Alle Klassen wurden erfolgreich verplant.</p>${statistikAusgabe}</div>`;
 
   plan.forEach((slotDaten, slotIndex) => {
-    ausgabe += `<h3>Slot ${slotIndex + 1}</h3>`;
-    ausgabe += '<table border="1" cellpadding="5" cellspacing="0"><thead><tr><th>Klasse</th><th>Anwesend</th><th>Möglich</th><th>Quote</th><th class="print-hidden">Slot</th></tr></thead><tbody>';
+    ausgabe += `<h3>Slot ${slotIndex + 1} <span class="slot-controls print-hidden">`;
+    if (slotIndex > 0) ausgabe += `<button class="move-slot-up" data-slot="${slotIndex}">↑ Nach oben</button> `;
+    if (slotIndex < maxSlots - 1) ausgabe += `<button class="move-slot-down" data-slot="${slotIndex}">↓ Nach unten</button> `;
+    ausgabe += `<select class="slot-mover print-hidden" data-current-slot="${slotIndex}"><option value="${slotIndex}">Bleibt in Slot ${slotIndex + 1}</option>`;
+    for (let i = 0; i < maxSlots; i++) {
+      if (i !== slotIndex) ausgabe += `<option value="${i}">In Slot ${i + 1} verschieben</option>`;
+    }
+    ausgabe += `</select></span></h3>`;
+    ausgabe += '<table border="1" cellpadding="5" cellspacing="0"><thead><tr><th>Klasse</th><th>Raum</th><th>Anwesend</th><th>Möglich</th><th>Quote</th><th class="print-hidden">Slot</th></tr></thead><tbody>';
 
     slotDaten.forEach(e => {
       const kl = state.klassenMap[e.klasse];
@@ -1069,7 +1198,14 @@ function zeigeErgebnis(ergebnis) {
         : '<em>Keine</em>';
 
       const dropdownHTML = `<select class="slot-changer print-hidden" data-klasse="${e.klasse}" data-current-slot="${slotIndex}">${Array.from({ length: maxSlots }, (_, i) => `<option value="${i}"${i === slotIndex ? ' selected' : ''}>Slot ${i + 1}</option>`).join('')}</select>`;
-      ausgabe += `<tr><td>${e.klasse} (${e.klassenleiter || '<em>...</em>'})</td><td><ul>${anwesendHTML}</ul></td><td>${moeglichHTML}</td><td>${(anwesendQuote * 100).toFixed(0)} % von ${gesamtLehrer}</td><td class="print-hidden">${dropdownHTML}</td></tr>`;
+
+      // Raum-Dropdown: Optionen aus state.raeume
+      const raumOptions = state.raeume.map((raum, index) => `<option value="${raum || ''}"${(e.raum || '') === (raum || '') ? ' selected' : ''}>${raum || `Raum ${index + 1}`}</option>`).join('');
+      const raumDuplikat = raumDuplikate.get(slotIndex) && raumDuplikate.get(slotIndex).get(e.raum || '') > 1;
+      const raumClass = raumDuplikat ? ' class="raum-duplikat"' : '';
+      const raumHinweis = raumDuplikat ? ' <span class="raum-hinweis">(Mehrfachnutzung!)</span>' : '';
+
+      ausgabe += `<tr><td>${e.klasse} (${e.klassenleiter || '<em>...</em>'})</td><td class="print-hidden"${raumClass}><select class="raum-select" data-slot="${slotIndex}" data-klasse="${e.klasse}">${raumOptions}</select>${raumHinweis}</td><td><ul>${anwesendHTML}</ul></td><td>${moeglichHTML}</td><td>${(anwesendQuote * 100).toFixed(0)} % von ${gesamtLehrer}</td><td class="print-hidden">${dropdownHTML}</td></tr>`;
     });
 
     ausgabe += '</tbody></table>';
@@ -1084,6 +1220,8 @@ function zeigeErgebnis(ergebnis) {
 
   addSlotChangeListeners(plan, ergebnis);
   addTeacherMoveListeners(plan, ergebnis);
+  addSlotMoveListeners(plan, ergebnis); // Neue Funktion für Slot-Verschiebung
+  addRaumSelectListeners(plan, ergebnis); // Modifizierte Funktion für Raum-Select
 }
 
 
@@ -1135,11 +1273,35 @@ function addSlotChangeListeners(plan, ergebnis) {
         }
       }
 
+      // Raum mitnehmen (da editierbar, bleibt der aktuelle)
+      // const raumIndex = plan[newSlot].length % state.raeume.length;
+      // klasseEntry.raum = state.raeume[raumIndex] || `Raum ${raumIndex + 1}`;
+
       currentSlotData.splice(currentSlotData.indexOf(klasseEntry), 1);
       plan[newSlot].push(klasseEntry);
       state.aktuellerPlan.plan = plan;
       speicherePlan(); // Speichere Plan und anwesende Lehrer
       zeigeErgebnis(ergebnis);
+    });
+  });
+}
+
+// Modifizierte Funktion für Raum-Select
+function addRaumSelectListeners(plan, ergebnis) {
+  document.querySelectorAll('.raum-select').forEach(select => {
+    select.addEventListener('change', function () {
+      const slotIndex = parseInt(this.dataset.slot);
+      const klasse = this.dataset.klasse;
+      const newRaum = this.value.trim();
+
+      const slotData = plan[slotIndex];
+      const entry = slotData.find(e => e.klasse === klasse);
+      if (entry) {
+        entry.raum = newRaum || '';
+        state.aktuellerPlan.plan = plan;
+        speicherePlan();
+        zeigeErgebnis(ergebnis); // Aktualisiere die Anzeige, um Duplikat-Warnungen zu überprüfen
+      }
     });
   });
 }
@@ -1215,17 +1377,74 @@ function addTeacherMoveListeners(plan, ergebnis) {
   });
 }
 
-// Export-Funktionen
+// Neue Funktion für das Verschieben ganzer Slots
+function addSlotMoveListeners(plan, ergebnis) {
+  // Nach oben/Nach unten Buttons
+  document.querySelectorAll('.move-slot-up').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const slotIndex = parseInt(e.target.dataset.slot);
+      if (slotIndex > 0) {
+        [plan[slotIndex - 1], plan[slotIndex]] = [plan[slotIndex], plan[slotIndex - 1]];
+        state.aktuellerPlan.plan = plan;
+        speicherePlan();
+        zeigeErgebnis(ergebnis);
+      }
+    });
+  });
+
+  document.querySelectorAll('.move-slot-down').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const slotIndex = parseInt(e.target.dataset.slot);
+      if (slotIndex < plan.length - 1 && plan[slotIndex + 1].length > 0) {
+        [plan[slotIndex + 1], plan[slotIndex]] = [plan[slotIndex], plan[slotIndex + 1]];
+        state.aktuellerPlan.plan = plan;
+        speicherePlan();
+        zeigeErgebnis(ergebnis);
+      }
+    });
+  });
+
+  // Slot-Mover Select
+  document.querySelectorAll('.slot-mover').forEach(select => {
+    select.addEventListener('change', (e) => {
+      const currentSlot = parseInt(e.target.dataset.currentSlot);
+      const newSlot = parseInt(e.target.value);
+      if (currentSlot === newSlot) {
+        e.target.value = currentSlot;
+        return;
+      }
+
+      // Verschiebe den gesamten Slot-Inhalt
+      const temp = plan[newSlot];
+      plan[newSlot] = plan[currentSlot];
+      plan[currentSlot] = temp;
+
+      // Räume für neuen Slot mitnehmen (da editierbar, bleiben pro Entry)
+      // plan[newSlot].forEach((entry, index) => {
+      //   const raumIndex = index % state.raeume.length;
+      //   entry.raum = state.raeume[raumIndex] || `Raum ${raumIndex + 1}`;
+      // });
+
+      state.aktuellerPlan.plan = plan;
+      speicherePlan();
+      zeigeErgebnis(ergebnis);
+    });
+  });
+}
+
+// Modifizierte Export-Funktionen mit Raum
 function exportKlassenplan() {
   if (!state.aktuellerPlan) {
     alert('Kein Plan zum Exportieren verfügbar. Bitte erstellen Sie zuerst einen Plan.');
     return;
   }
 
-  let csvContent = '\uFEFFSlot;Klasse;Klassenleiter;Lehrkräfte\n';
+  let csvContent = '\uFEFFSlot;Klasse;Raum;Klassenleiter;Lehrkräfte\n';
   state.aktuellerPlan.plan.forEach((slot, slotIndex) => {
     slot.forEach(entry => {
-      csvContent += `"Slot ${slotIndex + 1}";"${entry.klasse}";"${entry.klassenleiter || ''}";"${entry.lehrer.join(', ')}"\n`;
+      csvContent += `"Slot ${slotIndex + 1}";"${entry.klasse}";"${entry.raum || ''}";"${entry.klassenleiter || ''}";"${entry.lehrer.join(', ')}"\n`;
     });
   });
 
@@ -1272,7 +1491,7 @@ function exportLehrerplan() {
   document.body.removeChild(link);
 }
 
-// Planungsoptionen
+// Planungsoptionen (erweitert um Räume)
 function speicherePlanungsoptionen() {
   const optionen = {
     maxSlots: document.getElementById('maxSlots')?.value,
@@ -1281,6 +1500,7 @@ function speicherePlanungsoptionen() {
     klassenleiterPflicht: document.getElementById('klassenleiterPflicht')?.checked,
     einerProJahrgang: document.getElementById('einerProJahrgang')?.checked,
     bevorzugteFaecher: Array.from(state.bevorzugteFaecher),
+    raeume: state.raeume,
   };
   saveToLocalStorage('planungsoptionen', JSON.stringify(optionen));
 }
@@ -1300,6 +1520,9 @@ function ladePlanungsoptionen() {
     const einerProJahrgang = document.getElementById('einerProJahrgang');
     if (einerProJahrgang) einerProJahrgang.checked = optionen.einerProJahrgang !== undefined ? optionen.einerProJahrgang : true;
     state.bevorzugteFaecher = new Set(optionen.bevorzugteFaecher || []);
+    state.raeume = optionen.raeume || [];
+    // Aktualisiere Räume-UI nach dem Laden
+    updateRaeumeUI();
   }
 }
 
@@ -1310,6 +1533,24 @@ function updateFaecherUI() {
       <label><input type="checkbox" class="fachCheckbox" value="${f}" ${state.bevorzugteFaecher.has(f) ? 'checked' : ''}> ${f}</label>
     `).join('');
   }
+}
+
+// Neue Funktion: Alle Klassen auswählen
+function selectAllKlassen() {
+  document.querySelectorAll('.klasseCheckbox').forEach(cb => {
+    if (state.klassenMap[cb.value]) cb.checked = true;
+  });
+  speichereAuswahl();
+  addStatusMessage('Alle Klassen ausgewählt.');
+}
+
+// Neue Funktion: Alle Lehrer auswählen
+function selectAllLehrer() {
+  document.querySelectorAll('.lehrerCheckbox').forEach(cb => {
+    if (state.lehrerSet.has(cb.value)) cb.checked = true;
+  });
+  speichereAuswahl();
+  addStatusMessage('Alle Lehrer ausgewählt.');
 }
 
 // Event-Listener
@@ -1494,6 +1735,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       state.aktuellerPlan = null;
       state.anwesendeLehrer = new Set();
       state.bevorzugteFaecher = new Set();
+      state.raeume = [];
       state.lehrerSet.clear();
       state.faecherSet.clear();
       state.klassenMap = {};
@@ -1517,6 +1759,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     addUnterrichtRow.addEventListener('click', () => {
       const unterrichtCSV = getFromLocalStorage('unterrichtCSV');
       const lines = unterrichtCSV ? unterrichtCSV.split('\n').filter(line => line.trim()) : [];
+      // Für neue Zeilen: Annahme, dass Fachgruppe optional ist; hier ohne, um Kompatibilität zu wahren
       addTableRow('unterrichtCSVBody', ['klasse', 'fach', 'lehrkraft'], lines.length);
     });
   }
@@ -1524,7 +1767,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const saveUnterrichtCSV = document.getElementById('saveUnterrichtCSV');
   if (saveUnterrichtCSV) {
     saveUnterrichtCSV.addEventListener('click', () => {
-      saveCSV('unterrichtCSVBody', 'unterrichtCSV', ['klasse', 'fach', 'lehrkraft'], 'Unterricht wurde gespeichert.');
+      // Bestimme fields basierend auf aktueller Tabelle
+      const unterrichtBody = document.getElementById('unterrichtCSVBody');
+      const firstRow = unterrichtBody?.querySelector('tr');
+      if (firstRow) {
+        const fields = Array.from(firstRow.querySelectorAll('input[data-field]')).map(input => input.dataset.field);
+        saveCSV('unterrichtCSVBody', 'unterrichtCSV', fields, 'Unterricht wurde gespeichert.');
+      } else {
+        saveCSV('unterrichtCSVBody', 'unterrichtCSV', ['klasse', 'fach', 'lehrkraft'], 'Unterricht wurde gespeichert.');
+      }
     });
   }
 
@@ -1549,6 +1800,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     einerProJahrgang.addEventListener('change', toggleJahrgangInputs);
   } else {
     console.error("Element mit ID 'einerProJahrgang' wurde nicht gefunden.");
+  }
+
+  // Event-Listener für maxKlassenProSlot zur Aktualisierung der Räume
+  const maxKlassenProSlotInput = document.getElementById('maxKlassenProSlot');
+  if (maxKlassenProSlotInput) {
+    maxKlassenProSlotInput.addEventListener('input', () => {
+      updateRaeumeUI();
+      speicherePlanungsoptionen();
+    });
+  }
+
+  // Neue Event-Listener für "Alle auswählen"-Buttons
+  const selectAllKlassenBtn = document.getElementById('selectAllKlassen');
+  if (selectAllKlassenBtn) {
+    selectAllKlassenBtn.addEventListener('click', selectAllKlassen);
+  }
+
+  const selectAllLehrerBtn = document.getElementById('selectAllLehrer');
+  if (selectAllLehrerBtn) {
+    selectAllLehrerBtn.addEventListener('click', selectAllLehrer);
   }
 
   const planBtn = document.getElementById('planBtn');
@@ -1650,5 +1921,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   } else {
     console.error("Element mit ID 'exportLehrerBtn' wurde nicht gefunden.");
   }
-});
 
+  // Event-Listener für Fächer-Checkboxen
+  document.addEventListener('change', (e) => {
+    if (e.target.classList.contains('fachCheckbox')) {
+      if (e.target.checked) {
+        state.bevorzugteFaecher.add(e.target.value);
+      } else {
+        state.bevorzugteFaecher.delete(e.target.value);
+      }
+      speicherePlanungsoptionen();
+    }
+  });
+});

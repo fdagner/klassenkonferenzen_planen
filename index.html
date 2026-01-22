@@ -103,7 +103,7 @@
           <div class="faq-content">Der Konferenzplan kann manuell bearbeitet werden, nachdem ein Plan
             erstellt wurde. Sie können Lehrer zwischen den Spalten „Anwesend“ und „Möglich“ verschieben, indem Sie auf
             die Pfeile (→ oder ←) neben den Lehrern klicken, um sie hinzuzufügen oder zu entfernen. Zudem können Sie
-            Klassen zwischen Slots verschieben, indem Sie das Dropdown-Menü in der Spalte „Slot“ verwenden. Beachten
+            Klassen zwischen Slots verschieben, indem Sie das Dropdown-Menü in der Spalte „Slot“ verwenden. Räume können direkt in der Tabelle editiert werden. Beachten
             Sie, dass Änderungen die Mindestanwesenheitsquote oder die Klassenleiterpflicht beeinflussen können, und
             Warnungen werden angezeigt, falls Konflikte (z. B. doppelte Lehrer oder Jahrgangsüberschneidungen)
             auftreten. Nach jeder Änderung wird der Plan automatisch gespeichert.</div>
@@ -111,7 +111,7 @@
         <details class="faq-item">
           <summary>Welche Exportformate stehen zur Verfügung?</summary>
           <div class="faq-content">Der Konferenzplaner bietet zwei Exportformate: <ul>
-              <li><strong>Konferenzplan (CSV):</strong> Enthält für jeden Slot die Klasse, den Klassenleiter und die
+              <li><strong>Konferenzplan (CSV):</strong> Enthält für jeden Slot die Klasse, den Raum, den Klassenleiter und die
                 anwesenden Lehrer.</li>
               <li><strong>Lehrerplan (CSV):</strong> Zeigt für jeden Lehrer und Slot die Klassen, an deren Konferenzen
                 der Lehrer teilnimmt.</li>
@@ -222,8 +222,10 @@
           </ul>
         </div>
         <h3>Klassen</h3>
+        <button id="selectAllKlassen" class="select-all-btn">Alle Klassen auswählen</button>
         <div id="klassenContainer" class="checkbox-list"></div>
         <h3>Lehrer</h3>
+        <button id="selectAllLehrer" class="select-all-btn">Alle Lehrer auswählen</button>
         <div id="lehrerContainer" class="checkbox-list"></div>
         <h3>Planungsoptionen</h3>
         <div class="einstellungen">
@@ -231,6 +233,10 @@
           <input type="number" id="maxSlots" value="10" min="1" max="50" /><br /><br />
           <label for="maxKlassenProSlot">Maximale Anzahl der parallelen Klassenkonferenzen pro Zeitslot:</label>
           <input type="number" id="maxKlassenProSlot" value="5" min="1" max="100" /><br /><br />
+          <div id="raeumeContainer">
+            <label>Räume (einer pro parallele Konferenz):</label><br />
+            <div id="raeumeInputs"></div>
+          </div><br />
           <label for="anwesendQuote">Mindestanwesenheitsquote einer Konferenz (0–1):</label>
           <input type="number" id="anwesendQuote" value="0.5" step="0.05" min="0" max="1" /><br /><br />
           <label><input type="checkbox" id="klassenleiterPflicht" checked /> Klassenleiter in eigene Klasse
@@ -254,7 +260,7 @@
         </div>
         <label for="maxVersucheSlider">Max.&nbsp;<span id="maxVersucheValue"> 1000</span>&nbsp;Versuche
         </label>
-        <input type="range" id="maxVersucheSlider" min="500" max="5000" value="500" step="500" />
+        <input type="range" id="maxVersucheSlider" min="500" max="50000" value="500" step="500" />
         <div id="planOutput"></div>
 
 
