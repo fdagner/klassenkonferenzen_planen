@@ -998,6 +998,12 @@ function pruefeSlot(klasse, slot, plan, belegung, optionen) {
   const { maxKlassenProSlot, anwesendQuote, klassenleiterPflicht, einerProJahrgang, nurAnwesendeFuerQuote, ignoreQuote } = optionen;
   if (plan[slot].length >= maxKlassenProSlot) return null;
 
+  // Raumprüfung: Slot darf nicht mehr Klassen enthalten als definierte Räume
+  if (state.raeume.length > 0) {
+    const slotRaeume = new Set(plan[slot].map(e => e.raum));
+    if (slotRaeume.size >= state.raeume.length) return null;
+  }
+
   const besetzt = belegung[slot];
   const jahrgang = klasse.manuellerJahrgang || klasse.name.match(/^(\d+)/)?.[1] || null;
   if (einerProJahrgang && jahrgang) {
