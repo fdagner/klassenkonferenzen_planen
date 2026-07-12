@@ -41,6 +41,21 @@
           </div>
         </details>
         <details class="faq-item">
+          <summary>Muss ich die ASV-Exportdateien vor dem Import bereinigen?</summary>
+          <div class="faq-content">Nein, Sie können die Dateien direkt wie aus der ASV exportiert importieren.
+            Nicht benötigte Zeilen lassen sich <strong>nach dem Import</strong> in den Tabellen löschen:
+            Setzen Sie einfach den Haken in der Checkbox der betreffenden Zeilen und klicken Sie auf
+            „Ausgewählte löschen“. Beachten sollten Sie insbesondere Fachgruppen die nicht den Wert 1 haben:
+            <ul>
+              <li><strong>ILR-Stunden</strong> (Integrierte Lehrerreserve) – hier sind Lehrkräfte eingetragen, die
+                meist nicht regulär in der Klasse unterrichten.</li>
+              <li><strong>Unterrichtsdifferenzierungen</strong> – diese Zeilen bilden oft keine echten
+                Unterrichtsbeziehungen ab.</li>
+            </ul>
+            So bleiben nur die tatsächlich in der Klasse unterrichtenden Lehrkräfte übrig.
+          </div>
+        </details>
+        <details class="faq-item">
           <summary>Mit welcher Methode erfolgt die Berechnung?</summary>
           <div class="faq-content">Die Berechnung erfolgt mit einem Monte-Carlo-Ansatz, der einen randomisierten
             Greedy-Algorithmus mehrfach ausführt. Mehrere Pläne werden generiert. Der beste wird anhand minimaler
@@ -118,89 +133,190 @@
             </ul> Beide Exporte sind im CSV-Format verfügbar und können über die Schaltflächen „Klassenplan exportieren“
             und „Lehrerplan exportieren“ im Planungstab heruntergeladen werden.</div>
         </details>
+        <details class="faq-item">
+          <summary>Was bewirkt „Klassen auch bei unterschrittener Quote verplanen“ (Ignore-Quote)?</summary>
+          <div class="faq-content">Diese Option erlaubt es dem Planer, Klassen auch dann in einen Slot zu legen, wenn die
+            Mindestanwesenheitsquote nicht erreicht wird. Der Algorithmus versucht zunächst, alle Klassen quotenkonform
+            zu verplanen. Erst wenn eine Klasse in keinem Slot die Quote erfüllt, wird sie im zweiten Durchgang ohne
+            Quotenzwang platziert. Eine Warnung weist auf solche Fälle hin. Nützlich, wenn einzelne Klassen sehr viele
+            Lehrer haben und die Quote kaum zu erreichen ist.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Was bedeutet „Slots vollpacken erzwingen“?</summary>
+          <div class="faq-content">Ist diese Option aktiviert, versucht der Planer nach der eigentlichen Berechnung,
+            Klassen aus dünn besetzten Slots in vollere zu verschieben, sodass möglichst wenige Slots viele Klassen
+            enthalten (z. B. 5‑5‑5‑3 statt 4‑4‑4‑4). Die Quote wird dabei stets eingehalten. In Kombination mit
+            „Jahrgangsstufen aufteilen“ werden bevorzugt die vorderen Slots gefüllt und der letzte Slot nimmt den
+            Rest auf. Die erreichte Verteilung wird in der Statistik als „Slot-Belegung“ angezeigt.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Wozu dient die Option „Nur anwesende Lehrer für die Quote“?</summary>
+          <div class="faq-content">Normalerweise wird die Mindestanwesenheitsquote auf die <strong>Gesamtzahl</strong>
+            aller Lehrer einer Klasse angewendet (z. B. 10 Lehrer × 0,5 = 5 benötigte). Ist diese Option aktiviert,
+            wird stattdessen nur die Anzahl der <strong>tatsächlich anwesenden</strong> Lehrer als Basis verwendet.
+            Sind von 10 Lehrern nur 6 anwesend, beträgt die Mindestanzahl 6 × 0,5 = 3 statt 5. Das erleichtert die
+            Verplanung, wenn viele Lehrer abwesend sind.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Wie lege ich Startzeit, Dauer und Pausen fest?</summary>
+          <div class="faq-content">Unter „Planungsoptionen“ können Sie eine <strong>Startzeit</strong> (z. B. 13:00 Uhr)
+            und die <strong>Dauer pro Konferenz</strong> in Minuten eingeben. Die Slots werden dann automatisch mit
+            Uhrzeiten beschriftet (z. B. „13:00–13:20 Uhr“). Mit dem <strong>+ Pause hinzufügen</strong>-Button können
+            Sie nach einem beliebigen Slot eine Pause einfügen (Slot-Auswahl + Dauer). Die Zeitberechnung aller
+            folgenden Slots verschiebt sich entsprechend. Pausen werden in den CSV-Exporten als eigene Zeile
+            ausgewiesen.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Wozu dienen die „Bevorzugten Fächer“?</summary>
+          <div class="faq-content">In der Fächerliste (untere Hälfte des Optionen-Tabs) können Sie bestimmte Fächer
+            auswählen, die bei der Lehrerzuweisung bevorzugt werden sollen. Der Planer versucht dann, Lehrkräfte mit
+            diesen Fächern möglichst vielen Konferenzen zuzuteilen. Die erreichte Abdeckung wird in der Statistik als
+            „Fächertreffer“ in Prozent angezeigt. Dies ist z. B. nützlich, wenn bestimmte Beratungsfachkräfte
+            (Beratungslehrer, Schulpsychologen) an vielen Konferenzen teilnehmen sollen.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Was bedeuten die Warnungen und Tipps im Ergebnis?</summary>
+          <div class="faq-content">Nach der Planung werden Warnungen in einer roten Box aufgelistet. Jede Warnung
+            enthält einen spezifischen Tipp zur Behebung (z. B. „Quote senken“, „Ersatzklassenleiter eintragen“,
+            „mehr Lehrer als anwesend markieren“). Die Tipps helfen, die Ursache gezielt zu beheben. Zeigt die
+            Statistik eine gleichmäßige Slot-Belegung (z. B. 4‑4‑4‑4) trotz aktivierter Packung, erscheint ein
+            zusätzlicher Tipp, die Mindestanwesenheitsquote zu verringern.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Wie werden mehrere Versuche durchgeführt und ausgewählt?</summary>
+          <div class="faq-content">Mit dem Schieberegler „Max. Versuche“ stellen Sie ein, wie viele
+            Monte-Carlo-Durchläufe der Planer ausführt (500–50.000). Jeder Versuch erzeugt einen zufälligen Plan.
+            Der beste wird anhand dieser Kriterien ausgewählt:
+            <ol>
+              <li>Wenigste Warnungen</li>
+              <li>Höchster Packungs-Score (wenn „Slots vollpacken“ aktiv ist, sonst: höchste min. Quote)</li>
+              <li>Höchste minimale Anwesenheitsquote</li>
+              <li>Beste Fächer-Abdeckung</li>
+              <li>Geringste Quoten-Varianz</li>
+            </ol>
+            Höhere Versuchszahlen erhöhen die Chance auf einen guten Plan, verlängern aber die Rechenzeit.</div>
+        </details>
       </div>
 
       <div class="tab-content" id="unterricht">
-        <div class="file-upload hidden" id="csvTablesSection">
-          <h2>Unterricht & Klassenleiter</h2>
-          <div class="note">
-            <p></p>Importieren Sie hier den gesamten Unterricht und die Klassenleiter.</p>
-            <p>Das Format entspricht z. B.
-              den Exportdateien STDPLAN.txt und STDKLAS.txt der ASV.</p>
-            <p>Die Dateien müssen mindestens eine gültige Datenzeile enthalten, um als erfolgreich geladen zu gelten.
-            </p>
-            <p>Unterrichts- und Klassenleiterdaten werden lokal im Browser gespeichert und können
-              direkt ergänzt oder bearbeitet werden.</p>
-          </div>
-          <div id="csvMessage" class="message-box"></div>
-          <br>
-          <details class="faq-item">
-            <summary>Anleitung: Klassenleiter importieren</summary>
-            <ul>
-              <li><strong>Header</strong>: Die erste Zeile muss die Spaltenüberschriften enthalten: Klasse,
-                Klassenleitung (Reihenfolge beliebig, Groß-/Kleinschreibung wird ignoriert, Anführungsstriche optional).
-              </li>
-              <li><strong>Datenzeilen</strong>: Jede weitere Zeile repräsentiert eine Klassenleitungszuweisung mit den
-                Werten:
-                <ul>
-                  <li>Klasse: Name der Klasse (z. B. 5A, 10B).</li>
-                  <li>Klassenleitung: Name der Lehrkraft, die die Klassenleitung innehat (z. B. Mül).</li>
-                </ul>
-              </li>
-              <li><strong>Beispiel</strong>:
-                <pre>
-"Klasse","Klassenleitung"
-"5A","Mül"
-"6B","Sch"
-            </pre>
-              </li>
-            </ul>
-          </details>
-
-  <label for="klassenleiterInput" class="input-section" id="dropZoneKlassenleiter">
-  <p>Datei hierher ziehen oder klicken zum Hochladen</p>
-</label>
-<input type="file" id="klassenleiterInput" accept=".csv,.txt" style="display: none;" />
-
-<div id="klassenleiterCSVTable"></div>
-<button id="addKlassenleiterRow" class="add-row-btn">Neue Zeile hinzufügen</button>
-<button id="saveKlassenleiterCSV" class="save-btn">Änderungen speichern</button>
-          <details class="faq-item">
-            <summary>Anleitung: Unterricht importieren</summary>
-            <ul>
-              <li><strong>Kopfzeile</strong>: Die erste Zeile muss die Spaltenüberschriften enthalten: Klasse, Fach,
-                Lehrkraft (Reihenfolge beliebig, Groß-/Kleinschreibung wird ignoriert, Anführungsstriche optional).</li>
-              <li><strong>Datenzeilen</strong>: Jede weitere Zeile repräsentiert eine Unterrichtseinheit mit den Werten:
-                <ul>
-                  <li>Klasse: Name der Klasse (z. B. 5A, 10B).</li>
-                  <li>Fach: Name des Fachs (z. B. M, D).</li>
-                  <li>Lehrkraft: Kürzel der Lehrkraft (z. B. Mül, Sch).</li>
-                </ul>
-              </li>
-              <li><strong>Beispiel</strong>:
-                <pre>
-"Klasse","Fach","Lehrkraft"
-"5A","M","Mül"
-"5A","D","Sch"
-"6B","E","Mei"
-            </pre>
-              </li>
-            </ul>
-          </details>
-
- 
-<label for="unterrichtInput" class="input-section" id="dropZoneUnterricht">
-  <p>Datei hierher ziehen oder klicken zum Hochladen</p>
-</label>
-<input type="file" id="unterrichtInput" accept=".csv,.txt" style="display: none;" />
-
-
-          <div id="unterrichtCSVTable"></div>
-          <button id="addUnterrichtRow" class="add-row-btn">Neue Zeile hinzufügen</button>
-          <button id="saveUnterrichtCSV" class="save-btn">Änderungen speichern</button>
+        <h2>Daten importieren</h2>
+        <div class="note">
+          <p>Importieren Sie hier den gesamten Unterricht und die Klassenleiter – z. B. die Exportdateien
+            <code>STDPLAN.txt</code> und <code>STDKLAS.txt</code> der ASV. Beide Dateien werden lokal in Ihrem
+            Browser gespeichert und können danach direkt in den Tabellen ergänzt oder korrigiert werden.</p>
         </div>
 
-        <div class="file-upload" style="margin-top: 20px;">
+        <div id="csvMessage" class="message-box"></div>
+
+        <div class="file-upload hidden" id="csvTablesSection">
+          <div class="data-grid">
+
+            <!-- Klassenleiter -->
+            <section class="data-card" id="klassenleiterCSVSection">
+              <div class="data-card-header">
+                <h3>👤 Klassenleiter</h3>
+                <span class="file-format-badge">STDKLAS.txt</span>
+              </div>
+              <p class="data-card-subtitle">Ordnet jeder Klasse ihre Klassenleitung zu.</p>
+
+              <label for="klassenleiterInput" class="input-section" id="dropZoneKlassenleiter">
+                <p>Datei hierher ziehen oder klicken</p>
+              </label>
+              <input type="file" id="klassenleiterInput" accept=".csv,.txt" style="display: none;" />
+
+              <details class="format-details">
+                <summary>Format &amp; Beispiel anzeigen</summary>
+                <div class="format-details-content">
+                  <ul>
+                    <li><strong>Kopfzeile</strong>: Klasse, Klassenleitung (Reihenfolge beliebig,
+                      Groß-/Kleinschreibung wird ignoriert, Anführungszeichen optional).</li>
+                    <li><strong>Datenzeilen</strong>: je eine Klassenleitungszuweisung:
+                      <ul>
+                        <li>Klasse: Name der Klasse (z. B. 5A, 10B)</li>
+                        <li>Klassenleitung: Kürzel der Lehrkraft (z. B. Mül)</li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <pre>"Klasse","Klassenleitung"
+"5A","Mül"
+"6B","Sch"</pre>
+                </div>
+              </details>
+
+              <details class="data-table-collapse" open>
+                <summary>Importierte Daten <span class="row-count" id="klassenleiterRowCount"></span></summary>
+                <div class="data-table-collapse-content">
+                  <div id="klassenleiterCSVTable"></div>
+                  <div class="table-actions">
+                    <button id="addKlassenleiterRow" class="add-row-btn">+ Neue Zeile</button>
+                    <button id="saveKlassenleiterCSV" class="save-btn">Speichern</button>
+                    <button id="exportKlassenleiterCSV" class="export-btn">Exportieren</button>
+                    <button id="deleteSelectedKlassenleiterRows" class="delete-selected-btn" disabled>Ausgewählte
+                      löschen</button>
+                  </div>
+                </div>
+              </details>
+            </section>
+
+            <!-- Unterricht -->
+            <section class="data-card" id="unterrichtCSVSection">
+              <div class="data-card-header">
+                <h3>📚 Unterricht</h3>
+                <span class="file-format-badge">STDPLAN.txt</span>
+              </div>
+              <p class="data-card-subtitle">Verknüpft Klassen, Fächer und Lehrkräfte.</p>
+
+              <label for="unterrichtInput" class="input-section" id="dropZoneUnterricht">
+                <p>Datei hierher ziehen oder klicken</p>
+              </label>
+              <input type="file" id="unterrichtInput" accept=".csv,.txt" style="display: none;" />
+
+              <details class="format-details">
+                <summary>Format &amp; Beispiel anzeigen</summary>
+                <div class="format-details-content">
+                  <ul>
+                    <li><strong>Kopfzeile</strong>: Klasse, Fach, Lehrkraft (Reihenfolge beliebig,
+                      Groß-/Kleinschreibung wird ignoriert, Anführungszeichen optional).</li>
+                    <li><strong>Datenzeilen</strong>: je eine Unterrichtseinheit:
+                      <ul>
+                        <li>Klasse: Name der Klasse (z. B. 5A, 10B)</li>
+                        <li>Fach: Name des Fachs (z. B. M, D)</li>
+                        <li>Lehrkraft: Kürzel der Lehrkraft (z. B. Mül, Sch)</li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <pre>"Klasse","Fach","Lehrkraft"
+"5A","M","Mül"
+"5A","D","Sch"
+"6B","E","Mei"</pre>
+                </div>
+              </details>
+
+              <details class="data-table-collapse" open>
+                <summary>Importierte Daten <span class="row-count" id="unterrichtRowCount"></span></summary>
+                <div class="data-table-collapse-content">
+                  <div id="unterrichtCSVTable"></div>
+                  <div class="table-actions">
+                    <button id="addUnterrichtRow" class="add-row-btn">+ Neue Zeile</button>
+                    <button id="saveUnterrichtCSV" class="save-btn">Speichern</button>
+                    <button id="exportUnterrichtCSV" class="export-btn">Exportieren</button>
+                    <button id="deleteSelectedUnterrichtRows" class="delete-selected-btn" disabled>Ausgewählte
+                      löschen</button>
+                  </div>
+                </div>
+              </details>
+            </section>
+
+          </div>
+
+          <p class="hint-note">Jede Datei benötigt mindestens eine gültige Datenzeile, um als erfolgreich geladen
+            zu gelten. Beide Dateien werden erst zusammen benötigt, um mit der Planung zu beginnen.</p>
+        </div>
+
+        <div class="danger-zone">
+          <h4>Daten zurücksetzen</h4>
+          <p>Entfernt alle importierten Daten, den gespeicherten Plan und das Protokoll aus diesem Browser.
+            Dieser Schritt kann nicht rückgängig gemacht werden.</p>
           <button id="resetCSV" class="reset-btn">Gespeicherte Daten zurücksetzen</button>
         </div>
       </div>
@@ -238,11 +354,24 @@
             <div id="raeumeInputs"></div>
           </div><br />
           <label for="anwesendQuote">Mindestanwesenheitsquote einer Konferenz (0–1):</label>
-          <input type="number" id="anwesendQuote" value="0.5" step="0.05" min="0" max="1" /><br /><br />
+          <input type="number" id="anwesendQuote" value="0.5" step="0.05" min="0" max="1" />
+          <label><input type="checkbox" id="ignoreQuote" /> Klassen auch bei unterschrittener Quote verplanen</label><br />
+          <label><input type="checkbox" id="erzwingePackung" /> Slots vollpacken erzwingen</label><br /><br />
           <label><input type="checkbox" id="klassenleiterPflicht" checked /> Klassenleiter in eigene Klasse
             verplanen</label><br />
           <label><input type="checkbox" id="einerProJahrgang" checked /> Klassen einer Jahrgangsstufe auf alle Zeitslots
-            aufteilen</label><br /><br />
+            aufteilen</label><br />
+          <label><input type="checkbox" id="nurAnwesendeFuerQuote" /> Nur anwesende Lehrer für
+            Mindestanwesenheitsquote berücksichtigen</label><br /><br />
+          <label for="startZeit">Erste Konferenz beginnt um:</label>
+          <input type="time" id="startZeit" value="13:00" /><br /><br />
+          <label for="dauerMinuten">Dauer einer Konferenz (Minuten):</label>
+          <input type="number" id="dauerMinuten" value="20" min="1" max="180" /><br /><br />
+          <div id="pausenContainer">
+            <label>Pausen:</label>
+            <div id="pausenListe"></div>
+            <button type="button" id="pauseHinzufuegenBtn">+ Pause hinzufügen</button>
+          </div><br />
           <h2>Bevorzugte Fächer auswählen</h2>
           <div id="faecherContainer" class="checkbox-list"></div>
         </div>
@@ -268,6 +397,7 @@
     </div>
   </div>
 
+  <button id="scrollToTopBtn" class="scroll-to-top" title="Nach oben scrollen">↑</button>
   <footer>
 <div><p><a href="https://oer.fdagner.de">Startseite</a> · <a href="https://github.com/fdagner/klassenkonferenzen_planen">Download & Repository</a> · <a
           href="/impressum/">Impressum</a> · 

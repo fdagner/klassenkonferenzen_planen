@@ -2,12 +2,12 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f5f6f5;
     color: #333;
-    max-width: 950px;
+    max-width: 1050px;
     margin: 0 auto
 }
 
 .container {
-    width: 900px;
+    width: 1000px;
     margin: 0 auto;
 }
 
@@ -367,6 +367,14 @@ th {
     border-radius: 4px;
 }
 
+.warnungs-tipp {
+    display: block;
+    font-size: 0.9em;
+    color: #c00;
+    margin-top: 4px;
+    font-style: italic;
+}
+
 .slot-changer {
     padding: 5px;
     border: 1px solid #ccc;
@@ -407,6 +415,11 @@ em {
     color: red;
 }
 
+.quote-unterschritten {
+    color: red;
+    font-weight: bold;
+}
+
 .move-teacher-left,
 .move-teacher-right {
     text-decoration: none;
@@ -444,6 +457,40 @@ em {
     font-weight: bold;
 }
 
+.csv-table th.select-col,
+.csv-table td.select-col,
+.csv-table th.action-col,
+.csv-table td.action-col {
+    width: 1%;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.csv-table td.select-col input[type="checkbox"],
+.csv-table th.select-col input[type="checkbox"] {
+    width: auto;
+    cursor: pointer;
+}
+
+.delete-selected-btn {
+    background-color: #ff4d4d;
+    color: #fff;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.delete-selected-btn:hover:not(:disabled) {
+    background-color: #cc0000;
+}
+
+.delete-selected-btn:disabled {
+    background-color: #ffb3b3;
+    cursor: not-allowed;
+}
+
 .delete-row-btn {
     background: #ff4d4d;
     color: white;
@@ -469,6 +516,20 @@ em {
 
 .save-btn:hover {
     background-color: #218838;
+}
+
+.export-btn {
+    background-color: #17a2b8;
+    color: #fff;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.export-btn:hover {
+    background-color: #138496;
 }
 
 .add-row-btn {
@@ -516,6 +577,52 @@ em {
 
 .raum-hinweis {
     color: red;
+}
+
+#pausenContainer {
+    margin-top: 8px;
+}
+
+.pause-eintrag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+}
+
+.pause-eintrag select,
+.pause-eintrag input {
+    padding: 2px 4px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.pause-entfernen-btn {
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 2px 8px;
+    font-weight: bold;
+}
+
+.pause-entfernen-btn:hover {
+    background: #c82333;
+}
+
+#pauseHinzufuegenBtn {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 4px 12px;
+    margin-top: 4px;
+}
+
+#pauseHinzufuegenBtn:hover {
+    background: #0056b3;
 }
 
 @keyframes spin {
@@ -598,6 +705,16 @@ em {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border: 1px solid #b6dcff;
+    border-radius: 5px;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    list-style: none;
+    /* entfernt Standard-Aufzählungspunkt in Browsern, die ::marker nutzen */
+}
+
+.faq-item summary:hover {
+    background-color: #d3ebff;
+    box-shadow: 0 1px 4px rgba(0, 123, 255, 0.25);
 }
 
 .faq-item summary::-webkit-details-marker {
@@ -605,13 +722,55 @@ em {
     /* Entfernt das Standard-Dreieck in Webkit-Browsern */
 }
 
+.faq-item summary::marker {
+    content: '';
+    /* Entfernt das Standard-Dreieck in Firefox */
+}
+
 .faq-item summary::after {
-    content: '▼';
+    content: '▼ Ausklappen';
+    font-size: 0.85em;
+    font-weight: normal;
+    color: #007bff;
+    white-space: nowrap;
+    margin-left: 1em;
     transition: transform 0.3s ease;
 }
 
 .faq-item[open] summary::after {
-    transform: rotate(180deg);
+    content: '▲ Einklappen';
+    transform: rotate(0deg);
+}
+
+.faq-item .expand-hint {
+    font-weight: normal;
+    font-size: 0.85em;
+    color: #555;
+}
+
+/* Speziell hervorgehobene Anleitungs-Boxen (Import-Anleitungen) */
+.faq-item summary.anleitung-summary {
+    background-color: #fff6e0;
+    border-color: #ffcf66;
+}
+
+.faq-item summary.anleitung-summary:hover {
+    background-color: #ffedbb;
+}
+
+/* Einklappbarer Bereich für die importierten Tabellen-Daten */
+.data-table-collapse summary {
+    background-color: #eef7ff;
+}
+
+.data-table-collapse .row-count {
+    font-weight: normal;
+    color: #007bff;
+    margin-left: 0.4em;
+}
+
+.data-table-collapse-content {
+    padding-top: 0.75em;
 }
 
 .faq-content {
@@ -743,6 +902,11 @@ em {
         font-weight: bold;
     }
 
+    .quote-unterschritten {
+        color: #000;
+        font-weight: bold;
+    }
+
     em {
         color: #666;
         font-style: italic;
@@ -754,4 +918,188 @@ em {
     .info {
         box-shadow: none;
     }
+}
+
+/* ============================================================
+   Neu gestalteter "Daten"-Tab
+   ============================================================ */
+
+.hint-note {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 16px;
+}
+
+/* Zwei-Spalten-Raster für Klassenleiter- und Unterrichts-Import */
+.data-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 10px;
+}
+
+@media (max-width: 720px) {
+    .data-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.data-card {
+    background-color: #fff;
+    border: 1px solid #e1e5ea;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.data-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.data-card-header h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.15rem;
+}
+
+.data-card-subtitle {
+    margin: 4px 0 16px 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.file-format-badge {
+    font-size: 12px;
+    font-weight: 600;
+    background-color: #eef7ff;
+    color: #007bff;
+    padding: 3px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+}
+
+/* Drop-Zonen innerhalb der Karten nehmen die volle Breite ein */
+.data-card .input-section {
+    width: 90%;
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+.data-card .input-section p {
+    margin: 0;
+    font-weight: normal;
+    color: #555;
+}
+
+/* Format-/Beispiel-Anleitung: standardmäßig eingeklappt, dezenter Stil */
+.format-details {
+    margin-bottom: 14px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 0;
+}
+
+.format-details summary {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background-color: #f8f9fa;
+    color: #495057;
+    border-radius: 6px;
+}
+
+.format-details[open] summary {
+    border-radius: 6px 6px 0 0;
+    background-color: #f1f3f5;
+}
+
+.format-details-content {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.format-details-content pre {
+    background-color: #f8f8f8;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-size: 0.8rem;
+}
+
+/* Importierte-Daten-Tabelle innerhalb der Karte */
+.data-card .data-table-collapse {
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 0;
+    margin-bottom: 0;
+}
+
+.data-card .data-table-collapse summary {
+    border-radius: 6px;
+}
+
+.table-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.table-actions button {
+    margin: 0;
+}
+
+/* "Gefahrenzone" für den Reset-Button, klar von den Import-Karten abgesetzt */
+.danger-zone {
+    margin-top: 30px;
+    border: 1px solid #f5c2c7;
+    background-color: #fff5f5;
+    border-radius: 8px;
+    padding: 16px 20px;
+}
+
+.danger-zone h4 {
+    margin: 0 0 6px 0;
+    color: #dc3545;
+}
+
+.danger-zone p {
+    margin: 0 0 12px 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.quote-unterschritten {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.scroll-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.3s, transform 0.3s, background-color 0.3s;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.scroll-to-top:hover {
+    background-color: #0056b3;
+    transform: scale(1.1);
 }
