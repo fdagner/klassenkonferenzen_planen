@@ -1041,13 +1041,14 @@ function pruefeSlot(klasse, slot, plan, belegung, optionen) {
 function raumFuerSlot(plan, slot, jahrgang, jahrgangRaumMap) {
   if (state.raeume.length === 0) return `Raum ${plan[slot].length + 1}`;
   const belegteRaeumeSlot = new Set(plan[slot].map(e => e.raum));
-  // Wenn eine Jahrgangsstufen-Raum-Zuordnung aktiv ist und diese Stufe bereits
-  // einen festen Raum hat, diesen verwenden (sofern im Slot noch frei).
+
+  // 1) Jahrgang hat bereits einen festen Raum und dieser ist im Slot noch frei
   if (jahrgang && jahrgangRaumMap && jahrgangRaumMap.has(jahrgang)) {
     const raum = jahrgangRaumMap.get(jahrgang);
     if (!belegteRaeumeSlot.has(raum)) return raum;
   }
-  // Alle Räume, die bereits anderen Jahrgängen zugewiesen sind
+
+  // 2) Freien Raum im Slot suchen, der noch keinem Jahrgang fest zugeordnet ist
   const bereitsVergebeneRaeume = jahrgangRaumMap ? new Set(jahrgangRaumMap.values()) : new Set();
   for (let i = 0; i < state.raeume.length; i++) {
     const raum = state.raeume[i] || `Raum ${i + 1}`;
@@ -1058,7 +1059,8 @@ function raumFuerSlot(plan, slot, jahrgang, jahrgangRaumMap) {
       return raum;
     }
   }
-  // Fallback: Slot-belegte Räume prüfen, aber bereits vergebene bevorzugen
+
+  // 3) Freien Raum im Slot suchen (auch wenn bereits anderem Jahrgang zugeordnet)
   for (let i = 0; i < state.raeume.length; i++) {
     const raum = state.raeume[i] || `Raum ${i + 1}`;
     if (!belegteRaeumeSlot.has(raum)) {
@@ -1068,12 +1070,13 @@ function raumFuerSlot(plan, slot, jahrgang, jahrgangRaumMap) {
       return raum;
     }
   }
-  const raumIndex = plan[slot].length % state.raeume.length;
-  const raum = state.raeume[raumIndex] || `Raum ${raumIndex + 1}`;
+
+  // 4) Alle definierten Räume sind im Slot belegt – einen generierten verwenden
+  const generiert = `Raum ${plan[slot].length + 1}`;
   if (jahrgang && jahrgangRaumMap && !jahrgangRaumMap.has(jahrgang)) {
-    jahrgangRaumMap.set(jahrgang, raum);
+    jahrgangRaumMap.set(jahrgang, generiert);
   }
-  return raum;
+  return generiert;
 }
 
 function versuchePlanung(maxSlots, maxKlassenProSlot, anwesendQuote, klassenleiterPflicht, einerProJahrgang, nurAnwesendeFuerQuote, ignoreQuote, selectedKlassen, erzwingePackung) {
