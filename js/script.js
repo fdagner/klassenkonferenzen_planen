@@ -1630,8 +1630,9 @@ function zeigeErgebnis(ergebnis) {
   const maxCount = belegungCounts.length > 0 ? Math.max(...belegungCounts) : 0;
   const minCount = belegungCounts.length > 0 ? Math.min(...belegungCounts) : 0;
   const packingUniform = belegungCounts.length > 1 && maxCount - minCount <= 1;
+  const maxKlassenProSlotWert = parseInt(document.getElementById('maxKlassenProSlot')?.value) || Infinity;
   const erzwingePackungChecked = document.getElementById('erzwingePackung')?.checked;
-  const packungsTipp = erzwingePackungChecked && packingUniform
+  const packungsTipp = erzwingePackungChecked && packingUniform && maxCount < maxKlassenProSlotWert
     ? `<p class="warnungs-tipp">Tipp: Slot-Auslastung ist gleichmäßig, aber nicht verdichtet. Verringern Sie die Mindestanwesenheitsquote, um mehr Spielraum für die Packung zu erhalten.</p>`
     : '';
 
