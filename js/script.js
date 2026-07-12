@@ -1545,8 +1545,6 @@ function warnungsTipp(warnung) {
 
 function zeigeErgebnis(ergebnis) {
   const { plan, warnungen, faecherAbdeckung, anwesendQuote: ergebnisQuote, nurAnwesendeFuerQuote: ergebnisNurAnwesende } = ergebnis;
-  // Slots nach Anzahl der Konferenzen sortieren (vollste zuerst)
-  plan.sort((a, b) => b.length - a.length);
   // Klassen innerhalb jedes Slots nach Jahrgangsstufe sortieren
   plan.forEach(slot => slot.sort((a, b) => (parseInt(a.jahrgang) || 0) - (parseInt(b.jahrgang) || 0)));
   const maxSlots = parseInt(document.getElementById('maxSlots')?.value) || 0;
@@ -1742,10 +1740,7 @@ function addSlotChangeListeners(plan, ergebnis) {
         const jahrgang = state.klassenMap[klasse].manuellerJahrgang || state.klassenMap[klasse].name.match(/^(\d+)/)?.[1] || null;
         const slotJahrgaenge = plan[newSlot].map(p => p.jahrgang);
         if (jahrgang && slotJahrgaenge.includes(jahrgang)) {
-          if (!confirm(`Warnung: Jahrgang ${jahrgang} ist bereits in Zeitfenster ${newSlot + 1} vorhanden. Möchten Sie die Klasse trotzdem verschieben?`)) {
-            this.value = currentSlot;
-            return;
-          }
+          addStatusMessage(`Warnung: Jahrgang ${jahrgang} ist bereits in Zeitfenster ${newSlot + 1} vorhanden.`, false, true);
         }
       }
 
@@ -1850,7 +1845,7 @@ function addSlotMoveListeners(plan, ergebnis) {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       const slotIndex = parseInt(e.target.dataset.slot);
-      if (slotIndex < plan.length - 1 && plan[slotIndex + 1].length > 0) {
+      if (slotIndex < plan.length - 1) {
         [plan[slotIndex + 1], plan[slotIndex]] = [plan[slotIndex], plan[slotIndex + 1]];
         state.aktuellerPlan.plan = plan;
         speicherePlan();
