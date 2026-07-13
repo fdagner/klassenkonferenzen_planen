@@ -1,33 +1,3 @@
-/* ============================================================
-   Klassenkonferenzen planen – script.js
-   Refactoring-Hinweise (Funktionalität unverändert):
-   - Utility-Funktionen (escapeHtml, csvEscape, shuffle) extrahiert,
-     um Codeduplikate zu vermeiden und XSS/CSV-Injection abzusichern.
-   - Doppelter Initialisierungs-Block in DOMContentLoaded entfernt
-     (vorher wurde beim Start alles zweimal geladen).
-   - Die beiden DOMContentLoaded-Listener wurden zu einem
-     zusammengeführt.
-   - Tote/ungenutzte Funktion (setHasAny) entfernt.
-   - Klar in Abschnitte gegliedert (State, Utilities, CSV-Import,
-     Tabellen-UI, Auswahl, Planung, Export, Init).
-
-   Planungsalgorithmus (Abschnitt 8) überarbeitet:
-   - "Most constrained first": Klassen werden primär nach ihrem Lehrer-
-     Puffer (verfügbare Lehrkräfte minus Mindestanzahl) sortiert, nicht
-     mehr nur nach Fächer-Punkten. Knappe Klassen kommen zuerst dran.
-   - Best-Fit statt First-Fit bei der Slot-Wahl: es werden alle passenden
-     Slots gesammelt und der am wenigsten gefüllte gewählt (bessere
-     Lastverteilung, mehr Puffer für später kommende Klassen).
-   - Reparatur-Durchgang: Klassen, die im ersten Anlauf keinen Slot
-     gefunden haben, werden per Tausch mit einer bereits platzierten,
-     verdrängbaren Klasse doch noch untergebracht, sofern möglich.
-   - Zufalls-Tie-Break beim Sortieren: statt `Math.random() - 0.5`
-     direkt im Comparator (inkonsistenter Comparator, verzerrt/
-     Engine-abhängig) wird vorher gemischt und danach stabil sortiert.
-   - Schutz gegen Division durch 0 bei der Raumvergabe, falls keine
-     Räume konfiguriert sind.
-   ============================================================ */
-
 /* ---------------------------------------------------------------
    1) Globaler State
    --------------------------------------------------------------- */
@@ -1604,7 +1574,7 @@ function zeigeErgebnis(ergebnis) {
         .reduce((sum, l) => sum + countMatchingFaecher(klasse.lehrerFaecher.get(l) || new Set(), state.bevorzugteFaecher), 0);
 
       if (!quoteErfuellt) {
-        quoteWarnungen.push(`Klasse ${e.klasse} in Slot ${slotIndex + 1} hat nur ${e.lehrer.length} von ${nurAnwesendeFuerQuote ? `${anwesendeLehrerDerKlasse.length} anwesenden` : gesamtLehrer} Lehrern (Quote ${(e.lehrer.length / gesamtLehrer).toFixed(2)}, Mindestanwesenheitsquote ${anwesendQuote}).`);
+        quoteWarnungen.push(`Klasse ${e.klasse} in Slot ${slotIndex + 1} hat nur ${e.lehrer.length} von ${nurAnwesendeFuerQuote ? `${anwesendeLehrerDerKlasse.length} anwesenden` : gesamtLehrer} Lehrern (Quote ${effektiveQuote.toFixed(2)}, Mindestanwesenheitsquote ${anwesendQuote}).`);
       }
       if (klassenleiterPflicht) {
         if (!klasse.kl) {
@@ -1674,7 +1644,7 @@ function zeigeErgebnis(ergebnis) {
       const moeglich = alleLehrerDerKlasse.filter(l => !anwesend.includes(l));
       const gesamtLehrer = kl.lehrerSet.size;
       const quoteBasis = nurAnwesendeFuerQuote ? alleLehrerDerKlasse.length : gesamtLehrer;
-      const eAnwesendQuote = anwesend.length / gesamtLehrer;
+      const eAnwesendQuote = quoteBasis > 0 ? anwesend.length / quoteBasis : 0;
       const quoteErfuellt = anwesend.length >= Math.ceil(quoteBasis * anwesendQuote);
 
       const anwesendHTML = anwesend.map(l => {
@@ -1699,7 +1669,7 @@ function zeigeErgebnis(ergebnis) {
       const quoteUnterschritten = !quoteErfuellt;
       const quoteClass = quoteUnterschritten ? ' class="quote-unterschritten"' : '';
 
-      ausgabe += `<tr><td>${escapeHtml(e.klasse)} (${e.klassenleiter ? escapeHtml(e.klassenleiter) : '<em>...</em>'})</td><td class="print-hidden"${raumClass}><select class="raum-select" data-slot="${slotIndex}" data-klasse="${escapeHtml(e.klasse)}">${raumOptions}</select>${raumHinweis}</td><td><ul>${anwesendHTML}</ul></td><td>${moeglichHTML}</td><td${quoteClass}>${(eAnwesendQuote * 100).toFixed(0)} % von ${gesamtLehrer}</td><td class="print-hidden">${dropdownHTML}</td></tr>`;
+      ausgabe += `<tr><td>${escapeHtml(e.klasse)} (${e.klassenleiter ? escapeHtml(e.klassenleiter) : '<em>...</em>'})</td><td class="print-hidden"${raumClass}><select class="raum-select" data-slot="${slotIndex}" data-klasse="${escapeHtml(e.klasse)}">${raumOptions}</select>${raumHinweis}</td><td><ul>${anwesendHTML}</ul></td><td>${moeglichHTML}</td><td${quoteClass}>${(eAnwesendQuote * 100).toFixed(0)} % von ${quoteBasis}</td><td class="print-hidden">${dropdownHTML}</td></tr>`;
     });
 
     ausgabe += '</tbody></table>';
