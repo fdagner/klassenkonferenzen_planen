@@ -1347,6 +1347,23 @@ function versuchePlanung(maxSlots, maxKlassenProSlot, anwesendQuote, klassenleit
     }
   }
 
+  // --- Bei erzwingePackung: Slots nach Belegungsgröße absteigend anordnen ---
+  // Die Konsolidierung oben maximiert die Packungsdichte (Summe der Quadrate),
+  // ist aber positionsunabhängig – z.B. 5-3-5-5-1 und 5-5-5-3-1 sind für den
+  // Packungs-Score gleichwertig. Da Raum- und Konfliktprüfung nur vom Inhalt
+  // eines Slots abhängen, nicht von dessen Index, können die Slots komplett
+  // (inkl. Belegung) sicher umsortiert werden, ohne pruefeSlot erneut aufzurufen.
+  if (erzwingePackung) {
+    const reihenfolge = Array.from({ length: maxSlots }, (_, i) => i)
+      .sort((a, b) => (plan[b].length - plan[a].length) || (a - b));
+    const neuesPlan = reihenfolge.map(i => plan[i]);
+    const neueBelegung = reihenfolge.map(i => belegung[i]);
+    for (let i = 0; i < maxSlots; i++) {
+      plan[i] = neuesPlan[i];
+      belegung[i] = neueBelegung[i];
+    }
+  }
+
   // --- Slots auffüllen (Logik unverändert, nur Shuffle-Fix für Zufalls-Tie-Break) ---
   for (let slot = 0; slot < maxSlots; slot++) {
     const besetzt = belegung[slot];
