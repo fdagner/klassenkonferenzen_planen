@@ -343,6 +343,17 @@
         <h3>Lehrer</h3>
         <button id="selectAllLehrer" class="select-all-btn">Alle Lehrer auswählen</button>
         <div id="lehrerContainer" class="checkbox-list"></div>
+
+        <h3>Fachgruppen (aus Import)</h3>
+        <div class="note">
+          <p>Diese Fachgruppen wurden aus der Spalte „Fachgruppe“ der Unterrichts-Datei erkannt (z. B. <code>D_2</code>
+            für Fach D, Klassengruppe 2). Abgewählte Fachgruppen werden bei der Planung ignoriert – die betroffene
+            Lehrkraft gilt dann für diese Klasse als nicht unterrichtend, z. B. bei ILR-Stunden oder
+            Unterrichtsdifferenzierungen.</p>
+        </div>
+        <button id="selectAllFachgruppen" class="select-all-btn">Alle Fachgruppen auswählen</button>
+        <div id="fachgruppenContainer" class="checkbox-list"></div>
+
         <h3>Planungsoptionen</h3>
         <div class="einstellungen">
           <label for="maxSlots">Maximale Anzahl der Zeitslots:</label>

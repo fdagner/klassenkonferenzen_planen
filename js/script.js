@@ -10,8 +10,10 @@ const state = {
   aktuellerPlan: null,
   anwesendeLehrer: new Set(),
   bevorzugteFaecher: new Set(),
-  raeume: [], // Ein Raum pro paralleler Konferenz
+  raeume: [],
   pausen: [],
+  alleFachgruppen: new Set(),        
+  abgewaehlteFachgruppen: new Set(), 
 };
 
 // Merkt sich die aktuell eingestellte Sortierung je Tabelle, damit sie nach
@@ -235,10 +237,23 @@ async function ladeGespeicherteCSV(changedFile = null) {
   const neueKlassen = new Set();
   const neueLehrer = new Set();
   const neueFaecher = new Set();
+  const neueFachgruppen = new Set();
 
   state.aktuellerPlan = null;
   state.anwesendeLehrer = new Set();
   state.bevorzugteFaecher = new Set();
+
+  // Fachgruppen-Ausschluss muss VOR dem Zeilen-Parsing feststehen, damit
+  // ausgeschlossene Fachgruppen gar nicht erst in lehrerSet/lehrerFaecher landen.
+  const gespeicherteFachgruppenAuswahl = getFromLocalStorage('fachgruppenAuswahl');
+  try {
+    state.abgewaehlteFachgruppen = gespeicherteFachgruppenAuswahl
+      ? new Set(JSON.parse(gespeicherteFachgruppenAuswahl))
+      : new Set();
+  } catch (e) {
+    console.error('Fehler beim Parsen der Fachgruppen-Auswahl:', e);
+    state.abgewaehlteFachgruppen = new Set();
+  }
 
   // --- Unterrichts-CSV ---
   const unterrichtCSV = getFromLocalStorage('unterrichtCSV');
@@ -270,18 +285,36 @@ async function ladeGespeicherteCSV(changedFile = null) {
         }
         state.unterrichtLoaded = false;
       } else {
-        let validRows = 0;
+           let validRows = 0;
         for (let i = 1; i < lines.length; i++) {
           const columns = parseCSVLine(lines[i]);
           const klasse = columns[klasseIndex] ? columns[klasseIndex].replace(/"/g, '').trim() : '';
           const fach = columns[fachIndex] ? columns[fachIndex].replace(/"/g, '').trim() : '';
           const lehrkraft = columns[lehrkraftIndex] ? columns[lehrkraftIndex].replace(/"/g, '').trim() : '';
+          const fachgruppe = fachgruppeIndex !== -1 && columns[fachgruppeIndex]
+            ? columns[fachgruppeIndex].replace(/"/g, '').trim()
+            : '';
 
           if (!klasse || !fach || !lehrkraft) {
             if (changedFile === 'unterricht') {
               addStatusMessage(`Ungültige Daten in Unterrichts-CSV, Zeile ${i + 1}: Klasse, Fach oder Lehrkraft fehlt oder ist ungültig.`, false, true);
             }
             continue;
+          }
+
+          // Schlüssel aus Fach + Fachgruppe, damit z.B. "D / Fachgruppe 2"
+          // unabhängig von "E / Fachgruppe 2" ausgeschlossen werden kann.
+          // encodeURIComponent verhindert Kollisionen, falls Fach oder
+          // Fachgruppe selbst ein "|" enthalten sollten.
+          const fachgruppenSchluessel = fachgruppe
+            ? `${encodeURIComponent(fach)}|${encodeURIComponent(fachgruppe)}`
+            : '';
+
+          if (fachgruppenSchluessel) {
+            neueFachgruppen.add(fachgruppenSchluessel);
+            if (state.abgewaehlteFachgruppen.has(fachgruppenSchluessel)) {
+              continue; // diese Fach/Fachgruppen-Kombination ist abgewählt
+            }
           }
 
           neueFaecher.add(fach);
@@ -337,7 +370,7 @@ async function ladeGespeicherteCSV(changedFile = null) {
         }
         state.klassenleiterLoaded = false;
       } else {
-        const klassenGesehen = new Set();
+              const klassenGesehen = new Set();
         const doppelteKlassen = new Set();
         let validRows = 0;
 
@@ -389,6 +422,10 @@ async function ladeGespeicherteCSV(changedFile = null) {
 
   state.lehrerSet = new Set(neueLehrer);
   state.faecherSet = new Set(neueFaecher);
+  state.alleFachgruppen = neueFachgruppen;
+  state.abgewaehlteFachgruppen = new Set(
+    [...state.abgewaehlteFachgruppen].filter(fg => neueFachgruppen.has(fg))
+  );
 
   // Lade gespeicherte Plan-Daten (inkl. Räume)
   const gespeichertePlanDaten = getFromLocalStorage('planDaten');
@@ -818,6 +855,7 @@ function updateUI() {
   ladeAuswahl();
   ladePlanungsoptionen();
   updateFaecherUI();
+  updateFachgruppenUI();
   updateRaeumeUI();
 
   const exportBtn = document.getElementById('exportBtn');
@@ -862,6 +900,22 @@ function updateFaecherUI() {
     `).join('');
 }
 
+function updateFachgruppenUI() {
+  const fgCont = document.getElementById('fachgruppenContainer');
+  if (!fgCont) return;
+
+  const paare = Array.from(state.alleFachgruppen).map(schluessel => {
+    const [fachEnc, fachgruppeEnc] = schluessel.split('|');
+    return { schluessel, fach: decodeURIComponent(fachEnc), fachgruppe: decodeURIComponent(fachgruppeEnc) };
+  }).sort((a, b) => a.fach.localeCompare(b.fach) || a.fachgruppe.localeCompare(b.fachgruppe));
+
+  fgCont.innerHTML = paare.length > 0
+    ? paare.map(p => `
+        <label><input type="checkbox" class="fachgruppeCheckbox" value="${escapeHtml(p.schluessel)}" ${state.abgewaehlteFachgruppen.has(p.schluessel) ? '' : 'checked'}> ${escapeHtml(p.fach)} – Fachgruppe ${escapeHtml(p.fachgruppe)}</label>
+      `).join('')
+    : '<p>Keine Fachgruppen in den importierten Daten gefunden.</p>';
+}
+
 function selectAllKlassen() {
   document.querySelectorAll('.klasseCheckbox').forEach(cb => { if (state.klassenMap[cb.value]) cb.checked = true; });
   speichereAuswahl();
@@ -872,6 +926,12 @@ function selectAllLehrer() {
   document.querySelectorAll('.lehrerCheckbox').forEach(cb => { if (state.lehrerSet.has(cb.value)) cb.checked = true; });
   speichereAuswahl();
   addStatusMessage('Alle Lehrer ausgewählt.');
+}
+
+function selectAllFachgruppen() {
+  state.abgewaehlteFachgruppen = new Set();
+  saveToLocalStorage('fachgruppenAuswahl', JSON.stringify([]));
+  ladeGespeicherteCSV().then(() => addStatusMessage('Alle Fachgruppen ausgewählt.'));
 }
 
 /* ---------------------------------------------------------------
@@ -2080,7 +2140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const resetCSV = document.getElementById('resetCSV');
   if (resetCSV) {
     resetCSV.addEventListener('click', () => {
-      ['unterrichtCSV', 'klassenleiterCSV', 'planDaten', 'auswahlDaten', 'csvMessages'].forEach(key => localStorage.removeItem(key));
+      ['unterrichtCSV', 'klassenleiterCSV', 'planDaten', 'auswahlDaten', 'csvMessages', 'fachgruppenAuswahl'].forEach(key => localStorage.removeItem(key));
       state.unterrichtLoaded = false;
       state.klassenleiterLoaded = false;
       state.aktuellerPlan = null;
@@ -2090,6 +2150,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       state.lehrerSet.clear();
       state.faecherSet.clear();
       state.klassenMap = {};
+      state.alleFachgruppen = new Set();
+      state.abgewaehlteFachgruppen = new Set();
       updateUI();
       ladeAuswahl();
 
@@ -2213,7 +2275,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('selectAllKlassen')?.addEventListener('click', selectAllKlassen);
   document.getElementById('selectAllLehrer')?.addEventListener('click', selectAllLehrer);
+  document.getElementById('selectAllFachgruppen')?.addEventListener('click', selectAllFachgruppen);
 
+  document.addEventListener('change', (e) => {
+    if (e.target.classList.contains('fachgruppeCheckbox')) {
+      const fg = e.target.value;
+      if (e.target.checked) state.abgewaehlteFachgruppen.delete(fg);
+      else state.abgewaehlteFachgruppen.add(fg);
+      saveToLocalStorage('fachgruppenAuswahl', JSON.stringify(Array.from(state.abgewaehlteFachgruppen)));
+      ladeGespeicherteCSV(); // baut klassenMap neu auf und ruft intern updateUI() auf
+    }
+  });
+
+  // --- Planerstellung ---
   // --- Planerstellung ---
   const planBtn = document.getElementById('planBtn');
   if (planBtn) {
