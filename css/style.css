@@ -1103,3 +1103,12 @@ em {
     background-color: #0056b3;
     transform: scale(1.1);
 }
+
+.fachgruppen-block {
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 1.5em 1em 0;
+}
+.fachgruppen-block label {
+  display: block;
+}
