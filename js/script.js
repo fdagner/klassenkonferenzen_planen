@@ -904,36 +904,33 @@ function updateFachgruppenUI() {
   const fgCont = document.getElementById('fachgruppenContainer');
   if (!fgCont) return;
 
-  const paare = Array.from(state.alleFachgruppen).map(schluessel => {
-    const [fachEnc, fachgruppeEnc] = schluessel.split('|');
-    return { schluessel, fach: decodeURIComponent(fachEnc), fachgruppe: decodeURIComponent(fachgruppeEnc) };
-  }).sort((a, b) => a.fach.localeCompare(b.fach) || a.fachgruppe.localeCompare(b.fachgruppe));
+  const collator = new Intl.Collator('de', { numeric: true, sensitivity: 'base' });
 
-  fgCont.innerHTML = paare.length > 0
-    ? paare.map(p => `
-        <label><input type="checkbox" class="fachgruppeCheckbox" value="${escapeHtml(p.schluessel)}" ${state.abgewaehlteFachgruppen.has(p.schluessel) ? '' : 'checked'}> ${escapeHtml(p.fach)} – Fachgruppe ${escapeHtml(p.fachgruppe)}</label>
-      `).join('')
+  // Schlüssel in Fach + Fachgruppe zerlegen und nach Fach gruppieren
+  const proFach = new Map();
+  Array.from(state.alleFachgruppen).forEach(schluessel => {
+    const [fachEnc, fachgruppeEnc] = schluessel.split('|');
+    const fach = decodeURIComponent(fachEnc);
+    const fachgruppe = decodeURIComponent(fachgruppeEnc);
+    if (!proFach.has(fach)) proFach.set(fach, []);
+    proFach.get(fach).push({ schluessel, fachgruppe });
+  });
+
+  const faecher = Array.from(proFach.keys()).sort(collator.compare);
+
+  fgCont.innerHTML = faecher.length > 0
+    ? faecher.map(fach => {
+        const eintraege = proFach.get(fach).sort((a, b) => collator.compare(a.fachgruppe, b.fachgruppe));
+        return `
+          <div class="fachgruppen-block">
+            <strong>${escapeHtml(fach)}</strong>
+            ${eintraege.map(p => `
+              <label><input type="checkbox" class="fachgruppeCheckbox" value="${escapeHtml(p.schluessel)}" ${state.abgewaehlteFachgruppen.has(p.schluessel) ? '' : 'checked'}> Fachgruppe ${escapeHtml(p.fachgruppe)}</label>
+            `).join('')}
+          </div>`;
+      }).join('')
     : '<p>Keine Fachgruppen in den importierten Daten gefunden.</p>';
 }
-
-function selectAllKlassen() {
-  document.querySelectorAll('.klasseCheckbox').forEach(cb => { if (state.klassenMap[cb.value]) cb.checked = true; });
-  speichereAuswahl();
-  addStatusMessage('Alle Klassen ausgewählt.');
-}
-
-function selectAllLehrer() {
-  document.querySelectorAll('.lehrerCheckbox').forEach(cb => { if (state.lehrerSet.has(cb.value)) cb.checked = true; });
-  speichereAuswahl();
-  addStatusMessage('Alle Lehrer ausgewählt.');
-}
-
-function selectAllFachgruppen() {
-  state.abgewaehlteFachgruppen = new Set();
-  saveToLocalStorage('fachgruppenAuswahl', JSON.stringify([]));
-  ladeGespeicherteCSV().then(() => addStatusMessage('Alle Fachgruppen ausgewählt.'));
-}
-
 /* ---------------------------------------------------------------
    7) Planungsoptionen
    --------------------------------------------------------------- */
